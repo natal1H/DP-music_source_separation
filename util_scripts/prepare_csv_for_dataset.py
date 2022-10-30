@@ -45,6 +45,8 @@ def create_empty_df():
                              'title': pd.Series(dtype='str'),
                              'length': pd.Series(dtype='float'),  # in seconds
                              'bitrate': pd.Series(dtype='int'),
+                             'sample_rate': pd.Series(dtype='int'),
+                             'channels': pd.Series(dtype='int'),
                              'bass': pd.Series(dtype='str'),
                              'drums': pd.Series(dtype='str'),
                              'vocals': pd.Series(dtype='str'),
@@ -101,14 +103,24 @@ def get_mp3_bitrate(song_loc):
     return bitrate
 
 
+def get_mp3_sample_rate(song_loc):
+    audio = MP3(song_loc)
+    sample_rate = audio.info.sample_rate
+    return sample_rate
+
+
+def get_mp3_channels(song_loc):
+    audio = MP3(song_loc)
+    channels = audio.info.channels
+    return channels
+
+
 if __name__ == '__main__':
     directory, csv_loc = get_arguments()  # command line args
     originals_dir = os.path.join(directory, ORIGINALS_LOC)
     stems_dir = os.path.join(directory, STEMS_LOC)
 
     df = create_empty_df()  # empty dataframe where will be dataset info
-
-    i = 0
 
     for filename in os.listdir(originals_dir):
         f = os.path.join(originals_dir, filename)
@@ -128,6 +140,8 @@ if __name__ == '__main__':
                                     'title': f_basename.split("-")[1][:-4],  # [:-4] to remove extension
                                     'length': round(get_mp3_length(f), 2),
                                     'bitrate': get_mp3_bitrate(f),
+                                    'sample_rate': get_mp3_sample_rate(f),
+                                    'channels': get_mp3_channels(f),
                                     'bass': bass,
                                     'drums': drums,
                                     'vocals': vocals,
