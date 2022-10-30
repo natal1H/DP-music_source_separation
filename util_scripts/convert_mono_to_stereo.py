@@ -1,5 +1,5 @@
 # -----------------------------------------------------------
-# script to create csv for songs dataset
+# script to convert mono songs to stereo
 #
 # 2022 Natália Holková
 # xholko02@stud.fit.vutbr.cz

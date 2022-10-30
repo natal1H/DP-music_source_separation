@@ -1,5 +1,5 @@
 # -----------------------------------------------------------
-# script to create csv for songs dataset
+# script to resample songs to 44100Hz
 #
 # 2022 Natália Holková
 # xholko02@stud.fit.vutbr.cz
