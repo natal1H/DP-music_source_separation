@@ -95,17 +95,19 @@ class Mp3set:
 if __name__ == "__main__":
     print("mp3.py")
     print(ta.__version__)
+    print(ta.backend.get_audio_backend())
 
-    test_track_path = "C:\\Users\\Natali\\PycharmProjects\\DP-music_source_separation\\dataset\\3_doors_down-when_youre_young"
+    test_track_path = "/home/nati/PycharmProjects/DP-music_source_separation/3_doors_down-when_youre_young"
     # test_track_path = Path(test_track_path)
     # meta = _track_metadata(test_track_path, ["bass", "vocals", "drums", "guitars", "other"], True, EXT)
     # print(meta)
 
-    print(os.path.isfile(test_track_path + "\\mixture.mp3"))
-    mp3, _ = ta.load(test_track_path + "\\mixture.mp3")
+    print(os.path.isfile(test_track_path + "/mixture.mp3"))
+    print(ta.info(test_track_path + "/mixture.mp3", format="mp3"))
+    mp3, _ = ta.load(test_track_path + "/mixture.mp3", format="mp3")
     print(mp3.shape)
 
-    test_wav_path = "C:\\Users\\Natali\\PycharmProjects\\DP-music_source_separation\\test.wav"
-    print(os.path.isfile(test_wav_path))
-    wav, _ = ta.load(test_wav_path)
-    print(wav.shape)
+    # test_wav_path = "C:\\Users\\Natali\\PycharmProjects\\DP-music_source_separation\\test.wav"
+    # print(os.path.isfile(test_wav_path))
+    # wav, _ = ta.load(test_wav_path)
+    # print(wav.shape)
