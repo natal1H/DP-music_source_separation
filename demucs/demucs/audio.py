@@ -1,12 +1,17 @@
-from pathlib import Path
+# Copyright (c) Facebook, Inc. and its affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the license found in the
+# LICENSE file in the root directory of this source tree.
+
 import subprocess as sp
 import json
-
 import numpy as np
 import torch
 import torchaudio as ta
+from .utils import temp_filenames
+from pathlib import Path
 
-from utils import temp_filenames
 
 def _read_info(path):
     stdout_data = sp.check_output([
@@ -66,6 +71,7 @@ class AudioFile:
              samplerate=None,
              channels=None,
              temp_folder=None):
+        # TODO: test if works
         streams = np.array(range(len(self)))[streams]
         single = not isinstance(streams, np.ndarray)
         if single:
@@ -113,27 +119,27 @@ class AudioFile:
         return wav
 
 
-def convert_audio_channels(wav, channels=2):
+def convert_audio_channels(mp3, channels=2):
     """Convert audio to the given number of channels."""
-    *shape, src_channels, length = wav.shape
+    *shape, src_channels, length = mp3.shape
     if src_channels == channels:
         pass
     elif channels == 1:
         # Case 1:
         # The caller asked 1-channel audio, but the stream have multiple
         # channels, downmix all channels.
-        wav = wav.mean(dim=-2, keepdim=True)
+        mp3 = mp3.mean(dim=-2, keepdim=True)
     elif src_channels == 1:
         # Case 2:
         # The caller asked for multiple channels, but the input file have
         # one single channel, replicate the audio over all channels.
-        wav = wav.expand(*shape, channels, length)
+        mp3 = mp3.expand(*shape, channels, length)
     elif src_channels >= channels:
         # Case 3:
         # The caller asked for multiple channels, and the input file have
         # more channels than requested. In that case return the first channels.
-        wav = wav[..., :channels, :]
+        mp3 = mp3[..., :channels, :]
     else:
         # Case 4: What is a reasonable choice here?
         raise ValueError('The audio file has less channels than requested but is not mono.')
-    return wav
+    return mp3

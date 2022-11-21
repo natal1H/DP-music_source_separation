@@ -1,0 +1,16 @@
+defaults:
+  - _self_
+
+dset:
+  remixdset: ../datasets/remixes
+  db_samplerate: 44100
+  segment: 11
+  shift: 1
+  samplerate: 44100
+  channels: 2
+  normalize: true
+  metadata: ../metadata
+  sources: ['drums', 'bass', 'other', 'vocals', 'guitars']
+
+misc:
+  verbose: true
