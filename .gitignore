@@ -1,0 +1,6 @@
+venv
+datasets
+.idea
+demucs/outputs
+*.mp3
+*.wav
