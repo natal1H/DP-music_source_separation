@@ -3,6 +3,7 @@ defaults:
 
 dset:
   remixdset: ../datasets/remixes
+  medleydb:
   db_samplerate: 44100
   segment: 11
   shift: 1
@@ -12,5 +13,54 @@ dset:
   metadata: ../metadata
   sources: ['drums', 'bass', 'other', 'vocals', 'guitars']
 
+epochs: 10 # 360
+batch_size: 64
+
+optim:
+  lr: 3e-4
+  momentum: 0.9
+  beta2: 0.999
+  loss: l1    # l1 or mse
+  optim: adam
+  weight_decay: 0
+  clip_grad: 0
+
+seed: 42
+
 misc:
   verbose: true
+  show: false
+
+model_segment:  # override the segment parameter for the model, usually 5 times the training segment.
+
+model: demucs
+demucs:  # see demucs/demucs.py for a detailed description
+  # Channels
+  channels: 64
+  growth: 2
+  # Main structure
+  depth: 6
+  rewrite: true
+  lstm_layers: 0
+  # Convolutions
+  kernel_size: 8
+  stride: 4
+  context: 1
+  # Activations
+  gelu: true
+  glu: true
+  # Normalization
+  norm_groups: 4
+  norm_starts: 4
+  # DConv residual branch
+  dconv_depth: 2
+  dconv_mode: 1  # 1 = branch in encoder, 2 = in decoder, 3 = in both.
+  dconv_comp: 4
+  dconv_attn: 4
+  dconv_lstm: 4
+  dconv_init: 1e-4
+  # Pre/post treatment
+  resample: true
+  normalize: false
+  # Weight init
+  rescale: 0.1

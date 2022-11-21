@@ -167,10 +167,11 @@ class Mp3set:
             return example
 
 
-def get_remix_mp3_datasets(args):
-    """Extract the mp3 datasets from the XP arguments."""
-
-    print("get_mp3_datasets")
+def get_remixes_dataset(args):
+    """
+    Extract the remix dataset from the XP arguments.
+    Dataset from remixes is separated into train, valid, and test folders.
+    """
 
     sig = hashlib.sha1(str(args.dset.remixdset).encode()).hexdigest()[:8]
     metadata_file = Path(args.dset.metadata) / ('remixdset_' + sig + ".json")
@@ -198,3 +199,23 @@ def get_remix_mp3_datasets(args):
                        samplerate=args.dset.samplerate, channels=args.dset.channels,
                        normalize=args.dset.normalize, **kw_cv)
     return train_set, valid_set
+
+
+def get_medleydb_dataset(args):
+    """Extract the medleyDB dataset from the XP arguments."""
+    sig = hashlib.sha1(str(args.dset.medleydb).encode()).hexdigest()[:8]
+    metadata_file = Path(args.metadata) / ('medleydb_' + sig + ".json")
+    root = Path(args.dset.medleydb)
+    if not metadata_file.is_file() and distrib.rank == 0:
+        metadata_file.parent.mkdir(exist_ok=True, parents=True)
+        metadata = build_metadata(root, args.dset.sources)
+        json.dump(metadata, open(metadata_file, "w"))
+    if distrib.world_size > 1:
+        distributed.barrier()
+    metadata = json.load(open(metadata_file))
+
+    train_set = Mp3set(root, metadata, args.sources,
+                       segment=args.segment, shift=args.shift,
+                       samplerate=args.samplerate, channels=args.channels,
+                       normalize=args.normalize)
+    return train_set
