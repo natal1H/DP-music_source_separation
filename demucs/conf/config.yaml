@@ -13,8 +13,10 @@ dset:
   metadata: ../metadata
   sources: ['drums', 'bass', 'other', 'vocals', 'guitars']
 
-epochs: 10 # 360
+epochs: 2 # 360
 batch_size: 64
+max_batches:  # limit the number of batches per epoch, useful for debugging
+              # or if your dataset is gigantic.
 
 optim:
   lr: 3e-4
@@ -30,6 +32,8 @@ seed: 42
 misc:
   verbose: true
   show: false
+  num_workers: 1 #10
+  num_prints: 4
 
 model_segment:  # override the segment parameter for the model, usually 5 times the training segment.
 
@@ -64,3 +68,35 @@ demucs:  # see demucs/demucs.py for a detailed description
   normalize: false
   # Weight init
   rescale: 0.1
+
+quant:  # quantization hyper params
+  diffq:    # diffq penalty, typically 1e-4 or 3e-4
+  qat:      # use QAT with a fixed number of bits (not as good as diffq)
+  min_size: 0.2
+  group_size: 8
+
+# List of decay for EMA at batch or epoch level, e.g. 0.999.
+# Batch level EMA are kept on GPU for speed.
+ema:
+  epoch: []
+  batch: []
+
+augment:
+  shift_same: false
+  repitch:
+    proba: 0.2
+    max_tempo: 12
+  remix:
+    proba: 1
+    group_size: 4
+  scale:
+    proba: 1
+    min: 0.25
+    max: 1.25
+  flip: true
+
+continue_from:  # continue from other XP, give the XP Dora signature.
+continue_pretrained:   # signature of a pretrained XP, this cannot be a bag of models.
+pretrained_repo:   # repo for pretrained model (default is official AWS)
+continue_best: true
+continue_opt: false

@@ -72,17 +72,26 @@ def get_solver(args, model_only=False):
     assert args.batch_size % distrib.world_size == 0
     args.batch_size //= distrib.world_size
 
-    # if model_only:
-    #     return Solver(None, model, optimizer, args)
-
-    # TODO load datasets
+    if model_only:
+        return Solver(None, model, optimizer, args)
 
     train_set, valid_set = get_remixes_dataset(args)
     if args.dset.medleydb:
         extra_train_set = get_medleydb_dataset(args)
         train_set = ConcatDataset([train_set, extra_train_set])
 
-    return None
+    logger.info("train/valid set size: %d %d", len(train_set), len(valid_set))
+    train_loader = distrib.loader(
+        train_set, batch_size=args.batch_size, shuffle=True,
+        num_workers=args.misc.num_workers, drop_last=True)
+    # TODO shuffle really False? what is args.dset.full_cv
+    valid_loader = distrib.loader(
+        valid_set, batch_size=args.batch_size, shuffle=False,
+        num_workers=args.misc.num_workers, drop_last=True)
+    loaders = {"train": train_loader, "valid": valid_loader}
+
+    # Construct Solver
+    return Solver(loaders, model, optimizer, args)
 
 
 @hydra_main(config_path="../conf", config_name="config")
@@ -105,7 +114,8 @@ def main(args):
     from dora import get_xp
     logger.debug(get_xp().cfg)
 
-    solver = get_solver(args)
+    solver = get_solver(args, False)
+    solver.train()
 
 
 if __name__ == "__main__":

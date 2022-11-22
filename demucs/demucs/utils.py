@@ -4,6 +4,7 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+from collections import defaultdict
 from contextlib import contextmanager
 import tempfile
 import os
@@ -61,3 +62,57 @@ def center_trim(tensor: torch.Tensor, reference: tp.Union[torch.Tensor, int]):
     if delta:
         tensor = tensor[..., delta // 2:-(delta - delta // 2)]
     return tensor
+
+
+def pull_metric(history: tp.List[dict], name: str):
+    out = []
+    for metrics in history:
+        metric = metrics
+        for part in name.split("."):
+            metric = metric[part]
+        out.append(metric)
+    return out
+
+
+def EMA(beta: float = 1):
+    """
+    Exponential Moving Average callback.
+    Returns a single function that can be called to repeatidly update the EMA
+    with a dict of metrics. The callback will return
+    the new averaged dict of metrics.
+
+    Note that for `beta=1`, this is just plain averaging.
+    """
+    fix: tp.Dict[str, float] = defaultdict(float)
+    total: tp.Dict[str, float] = defaultdict(float)
+
+    def _update(metrics: dict, weight: float = 1) -> dict:
+        nonlocal total, fix
+        for key, value in metrics.items():
+            total[key] = total[key] * beta + weight * float(value)
+            fix[key] = fix[key] * beta + weight
+        return {key: tot / fix[key] for key, tot in total.items()}
+    return _update
+
+
+class DummyPoolExecutor:
+    class DummyResult:
+        def __init__(self, func, *args, **kwargs):
+            self.func = func
+            self.args = args
+            self.kwargs = kwargs
+
+        def result(self):
+            return self.func(*self.args, **self.kwargs)
+
+    def __init__(self, workers=0):
+        pass
+
+    def submit(self, func, *args, **kwargs):
+        return DummyPoolExecutor.DummyResult(func, *args, **kwargs)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        return

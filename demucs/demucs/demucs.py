@@ -410,7 +410,7 @@ class Demucs(nn.Module):
 
     def forward(self, mix):
         x = mix
-        length = x.shape[-1]
+        length = x.shape[-1]  # TODO: length 44100 je spravne? preco je to samplerate?
 
         if self.normalize:
             mono = mix.mean(dim=1, keepdim=True)
@@ -429,7 +429,7 @@ class Demucs(nn.Module):
 
         saved = []
         for encode in self.encoder:
-            x = encode(x)
+            x = encode(x)  # TODO tu konkretne padne! asi je trochu zla forma dat
             saved.append(x)
 
         if self.lstm:
