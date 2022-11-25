@@ -7,3 +7,4 @@ dora-search
 hydra-colorlog==1.1.0
 hydra-core==1.1.0
 diffq>=0.2.1
+ffmpeg
