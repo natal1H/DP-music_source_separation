@@ -14,7 +14,7 @@ import torch.nn.functional as F
 from . import augment, distrib, states, pretrained
 from .apply import apply_model
 from .ema import ModelEMA
-from .evaluate import new_sdr
+from .evaluate import new_sdr, evaluate
 from .svd import svd_penalty
 from .utils import pull_metric, EMA
 
@@ -261,6 +261,8 @@ class Solver(object):
             if div:
                 logger.warning("Finishing training early because valid loss is too high.")
                 is_last = True
+            #############
+
             # if should_eval or is_last:
             #     # Evaluate on the testset
             #     logger.info('-' * 70)
@@ -276,6 +278,8 @@ class Solver(object):
             #             metrics['test'] = evaluate(self, compute_sdr=compute_sdr)
             #     formatted = self._format_test(metrics['test'])
             #     logger.info(bold(f"Test Summary | Epoch {epoch + 1} | {_summary(formatted)}"))
+
+            ##########
             self.link.push_metrics(metrics)
 
             if distrib.rank == 0:

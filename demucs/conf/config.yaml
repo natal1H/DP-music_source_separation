@@ -2,7 +2,7 @@ defaults:
   - _self_
 
 dset:
-  remixdset: ../datasets/remixes
+  remixdset: ../datasets/remixes_short #../datasets/remixes
   medleydb:
   db_samplerate: 44100
   segment: 6
@@ -32,6 +32,7 @@ weights: [1., 1., 1., 1., 1.]  # weights over each source for the training/valid
 flag:
 debug: false
 valid_apply: false
+save_every:
 
 misc:
   verbose: true
@@ -117,8 +118,8 @@ svd:  # see svd.py for documentation
   bs: 1
 
 test:
-  save: False
-  best: True
+  save: True # originally False
+  best: False # originally True
   workers: 2
   every: 20
   split: true

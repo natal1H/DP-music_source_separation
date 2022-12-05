@@ -178,9 +178,6 @@ def get_remixes_dataset(args):
     train_path = Path(args.dset.remixdset) / "train"
     valid_path = Path(args.dset.remixdset) / "valid"
 
-    print(train_path)
-    print(valid_path)
-
     if not metadata_file.is_file() and distrib.rank == 0:
          metadata_file.parent.mkdir(exist_ok=True, parents=True)
          train = build_metadata(train_path, args.dset.sources)
@@ -199,6 +196,30 @@ def get_remixes_dataset(args):
                        samplerate=args.dset.samplerate, channels=args.dset.channels,
                        normalize=args.dset.normalize, **kw_cv)
     return train_set, valid_set
+
+
+def get_test_dataset(args):
+    """
+    Extract the test remix dataset from the XP arguments.
+    """
+
+    sig = hashlib.sha1(str(args.dset.remixdset).encode()).hexdigest()[:8]
+    metadata_file = Path(args.dset.metadata) / ('testset_' + sig + ".json")
+    test_path = Path(args.dset.remixdset) / "test"
+
+    if not metadata_file.is_file() and distrib.rank == 0:
+         metadata_file.parent.mkdir(exist_ok=True, parents=True)
+         metadata = build_metadata(test_path, args.dset.sources)
+         json.dump(metadata, open(metadata_file, "w"))
+    if distrib.world_size > 1:
+        distributed.barrier()
+    metadata = json.load(open(metadata_file))
+
+    test_set = Mp3set(test_path, metadata, args.dset.sources,
+                       segment=args.dset.segment, shift=args.dset.shift,
+                       samplerate=args.dset.samplerate, channels=args.dset.channels,
+                       normalize=args.dset.normalize)
+    return test_set
 
 
 def get_medleydb_dataset(args):

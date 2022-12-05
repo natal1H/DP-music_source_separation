@@ -11,6 +11,8 @@ import torch
 import torchaudio as ta
 from .utils import temp_filenames
 from pathlib import Path
+import julius
+import lameenc
 
 
 def _read_info(path):
@@ -143,3 +145,66 @@ def convert_audio_channels(mp3, channels=2):
         # Case 4: What is a reasonable choice here?
         raise ValueError('The audio file has less channels than requested but is not mono.')
     return mp3
+
+
+def i16_pcm(wav):
+    """Convert audio to 16 bits integer PCM format."""
+    if wav.dtype.is_floating_point:
+        return (wav.clamp_(-1, 1) * (2**15 - 1)).short()
+    else:
+        return wav
+
+def encode_mp3(wav, path, samplerate=44100, bitrate=320, verbose=False):
+    """Save given audio as mp3. This should work on all OSes."""
+    C, T = wav.shape
+    wav = i16_pcm(wav)
+    encoder = lameenc.Encoder()
+    encoder.set_bit_rate(bitrate)
+    encoder.set_in_sample_rate(samplerate)
+    encoder.set_channels(C)
+    encoder.set_quality(2)  # 2-highest, 7-fastest
+    if not verbose:
+        encoder.silence()
+    wav = wav.data.cpu()
+    wav = wav.transpose(0, 1).numpy()
+    mp3_data = encoder.encode(wav.tobytes())
+    mp3_data += encoder.flush()
+    with open(path, "wb") as f:
+        f.write(mp3_data)
+
+
+def prevent_clip(wav, mode='rescale'):
+    """
+    different strategies for avoiding raw clipping.
+    """
+    assert wav.dtype.is_floating_point, "too late for clipping"
+    if mode == 'rescale':
+        wav = wav / max(1.01 * wav.abs().max(), 1)
+    elif mode == 'clamp':
+        wav = wav.clamp(-0.99, 0.99)
+    elif mode == 'tanh':
+        wav = torch.tanh(wav)
+    else:
+        raise ValueError(f"Invalid mode {mode}")
+    return wav
+
+
+def convert_audio(mp3, from_samplerate, to_samplerate, channels):
+    """Convert audio from a given samplerate to a target one and target number of channels."""
+    mp3 = convert_audio_channels(mp3, channels)
+    return julius.resample_frac(mp3, from_samplerate, to_samplerate)
+
+
+def save_audio(wav, path, samplerate, bitrate=320, clip='rescale',
+               bits_per_sample=16, as_float=False):
+    """Save audio file, automatically preventing clipping if necessary
+    based on the given `clip` strategy. If the path ends in `.mp3`, this
+    will save as mp3 with the given `bitrate`.
+    """
+    wav = prevent_clip(wav, mode=clip)
+    path = Path(path)
+    suffix = path.suffix.lower()
+    if suffix == ".mp3":
+        encode_mp3(wav, path, samplerate, bitrate)
+    else:
+        raise ValueError(f"Invalid suffix for path: {suffix}")
