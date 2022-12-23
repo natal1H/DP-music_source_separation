@@ -263,21 +263,21 @@ class Solver(object):
                 is_last = True
             #############
 
-            # if should_eval or is_last:
-            #     # Evaluate on the testset
-            #     logger.info('-' * 70)
-            #     logger.info('Evaluating on the test set...')
-            #     # We switch to the best known model for testing
-            #     if self.args.test.best:
-            #         state = self.best_state
-            #     else:
-            #         state = states.copy_state(self.model.state_dict())
-            #     compute_sdr = self.args.test.sdr and is_last
-            #     with states.swap_state(self.model, state):
-            #         with torch.no_grad():
-            #             metrics['test'] = evaluate(self, compute_sdr=compute_sdr)
-            #     formatted = self._format_test(metrics['test'])
-            #     logger.info(bold(f"Test Summary | Epoch {epoch + 1} | {_summary(formatted)}"))
+            if should_eval or is_last:
+                # Evaluate on the testset
+                logger.info('-' * 70)
+                logger.info('Evaluating on the test set...')
+                # We switch to the best known model for testing
+                if self.args.test.best:
+                    state = self.best_state
+                else:
+                    state = states.copy_state(self.model.state_dict())
+                compute_sdr = self.args.test.sdr and is_last
+                with states.swap_state(self.model, state):
+                    with torch.no_grad():
+                        metrics['test'] = evaluate(self, compute_sdr=compute_sdr)
+                formatted = self._format_test(metrics['test'])
+                logger.info(bold(f"Test Summary | Epoch {epoch + 1} | {_summary(formatted)}"))
 
             ##########
             self.link.push_metrics(metrics)
