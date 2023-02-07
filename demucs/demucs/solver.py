@@ -244,7 +244,7 @@ class Solver(object):
                 bold(f'Valid Summary | Epoch {epoch + 1} | {_summary(formatted)}'))
 
             # Save the best model
-            if valid_loss == best_loss or self.args.dset.train_valid:
+            if valid_loss == best_loss: #or self.args.dset.train_valid:
                 logger.info(bold('New best valid loss %.4f'), valid_loss)
                 self.best_state = states.copy_state(state)
                 self.best_changed = True

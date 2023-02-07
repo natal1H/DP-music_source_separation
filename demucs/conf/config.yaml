@@ -2,7 +2,7 @@ defaults:
   - _self_
 
 dset:
-  remixdset: ../datasets/remixes_short #../datasets/remixes
+  remixdset: ../datasets/remixes #../datasets/remixes
   medleydb:
   db_samplerate: 44100
   segment: 6
@@ -13,7 +13,7 @@ dset:
   metadata: ../metadata
   sources: ['drums', 'bass', 'other', 'vocals', 'guitars']
 
-epochs: 1 # 360
+epochs: 10 # 360
 batch_size: 8
 max_batches:  # limit the number of batches per epoch, useful for debugging
               # or if your dataset is gigantic.
@@ -103,7 +103,7 @@ augment:
 continue_from:  # continue from other XP, give the XP Dora signature.
 continue_pretrained:   # signature of a pretrained XP, this cannot be a bag of models.
 pretrained_repo:   # repo for pretrained model (default is official AWS)
-continue_best: true
+continue_best: false
 continue_opt: false
 
 svd:  # see svd.py for documentation
