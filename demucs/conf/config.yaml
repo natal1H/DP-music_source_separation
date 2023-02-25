@@ -2,7 +2,7 @@ defaults:
   - _self_
 
 dset:
-  remixdset: ../datasets/remixes #../datasets/remixes
+  remixdset: ../datasets/remix_dataset #../datasets/remixes
   medleydb:
   db_samplerate: 44100
   segment: 6

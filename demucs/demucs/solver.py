@@ -262,7 +262,7 @@ class Solver(object):
                 logger.warning("Finishing training early because valid loss is too high.")
                 is_last = True
             #############
-
+            """
             if should_eval or is_last:
                 # Evaluate on the testset
                 logger.info('-' * 70)
@@ -278,7 +278,7 @@ class Solver(object):
                         metrics['test'] = evaluate(self, compute_sdr=compute_sdr)
                 formatted = self._format_test(metrics['test'])
                 logger.info(bold(f"Test Summary | Epoch {epoch + 1} | {_summary(formatted)}"))
-
+            """
             ##########
             self.link.push_metrics(metrics)
 
@@ -316,7 +316,7 @@ class Solver(object):
             if not train and self.args.valid_apply:
                 estimate = apply_model(self.model, mix, split=self.args.test.split, overlap=0)
             else:
-                estimate = self.dmodel(mix)  # TODO - tu padne!
+                estimate = self.dmodel(mix)
             if train and hasattr(self.model, 'transform_target'):
                 sources = self.model.transform_target(mix, sources)
             assert estimate.shape == sources.shape, (estimate.shape, sources.shape)
