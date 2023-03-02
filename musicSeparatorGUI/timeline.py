@@ -1,11 +1,14 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
-from utils import changeWidgetColor
+from PyQt5.QtMultimedia import QMediaPlayer
+from utils import changeWidgetColor, formatTime
 
 class Timeline(QWidget):
-    def __init__(self):
+    def __init__(self, player: QMediaPlayer):
         super().__init__()
+        self.player = player
+        self.player.durationChanged.connect(self.change_total_time)
 
         # Fill with color to see borders
         changeWidgetColor(self, QColor("#E8E8E8"))
@@ -13,14 +16,18 @@ class Timeline(QWidget):
         layout = QHBoxLayout()
         layout.setContentsMargins(10, 0, 10, 0)  # Left, top, right, bottom
 
-        currentTimeLabel = QLabel("Current time")
-        totalTimeLabel = QLabel("Total time")
-        totalTimeLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.currentTimeLabel = QLabel("--:--")
+        self.totalTimeLabel = QLabel("--:--")
+        self.totalTimeLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
-        layout.addWidget(currentTimeLabel)
-        layout.addWidget(totalTimeLabel)
+        layout.addWidget(self.currentTimeLabel)
+        layout.addWidget(self.totalTimeLabel)
 
         self.setLayout(layout)
 
         # Set fixed height
         self.setFixedHeight(30)
+
+    def change_total_time(self):
+        self.totalTimeLabel.setText(formatTime(self.player.duration()))
+

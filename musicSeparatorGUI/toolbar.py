@@ -1,15 +1,17 @@
 from PyQt5.QtWidgets import QPushButton, QWidget, QHBoxLayout, QSlider, QLabel
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QColor, QIcon, QPixmap
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtMultimedia import QMediaPlayer
 from utils import changeWidgetColor
 
 
 class Toolbar(QWidget):
-    player = None
 
-    def __init__(self):
+    def __init__(self, player: QMediaPlayer):
         super().__init__()
+
+        # Media player
+        self.player = player
 
         # Fill with color to see borders
         changeWidgetColor(self, QColor("#CACACA"))
@@ -44,6 +46,8 @@ class Toolbar(QWidget):
         self.volumeSlider = QSlider(Qt.Horizontal)
         self.volumeSlider.setRange(0, 100)
         self.volumeSlider.setSingleStep(1)
+        self.volumeSlider.setValue(self.player.volume())
+        self.volumeSlider.valueChanged.connect(self.change_volume)
 
         volumeIcon = QLabel()
         volumeIcon.setFixedSize(QSize(30, 30))
@@ -51,9 +55,6 @@ class Toolbar(QWidget):
 
         volumeLabelMin = QLabel(str(self.volumeSlider.minimum()))
         volumeLabelMax = QLabel(str(self.volumeSlider.maximum()))
-
-        # Media player
-        #self.player = None
 
         # add all widgets to toolbar in order
         layout.addWidget(self.playPauseButton)
@@ -71,9 +72,6 @@ class Toolbar(QWidget):
         # Set max toolbar height
         self.setFixedHeight(50)
 
-    def set_player(self, player: QMediaPlayer):
-        self.player = player
-
     def play_pause_song(self):
         # Check if player has loaded audio
         if self.player.isAudioAvailable():
@@ -83,3 +81,6 @@ class Toolbar(QWidget):
             else:
                 self.playPauseButton.setIcon(QIcon('img/pause_icon.png'))
                 self.player.play()
+
+    def change_volume(self):
+        self.player.setVolume(self.volumeSlider.value())

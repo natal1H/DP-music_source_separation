@@ -10,6 +10,14 @@ def changeWidgetColor(widget, color):
     widget.setPalette(palette)
 
 
+def formatTime(ms: int):
+    # TODO: add option for hours
+    seconds = ms / 1000
+    minutes = int(seconds / 60)
+    seconds = int(seconds % 60)
+    return f"{minutes}:{seconds}"
+
+
 class QHSeparationLine(QFrame):
     """
     Horizontal separation line

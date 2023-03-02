@@ -29,20 +29,27 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 0)  # Left, top, right, bottom
         layout.setSpacing(0)
 
-        self.toolbar = Toolbar()
-        self.timeline = Timeline()
-        self.mixture_track = Track("Mixture")
-        self.bass_track = Track("Bass")
-        self.drums_track = Track("Drums")
-        self.guitars_track = Track("Guitars")
-        self.vocals_track = Track("Vocals")
-        self.other_track = Track("Other")
-
         # Player for playing songs
         self.player = QMediaPlayer()
-        self.toolbar.set_player(self.player)
+        self.player.setVolume(50)
+
+        self.toolbar = Toolbar(self.player)
+        self.timeline = Timeline(self.player)
+        self.mixture_track = Track("Mixture")
+        self.mixture_track.hide()
+        self.bass_track = Track("Bass")
+        self.bass_track.hide()
+        self.drums_track = Track("Drums")
+        self.drums_track.hide()
+        self.guitars_track = Track("Guitars")
+        self.guitars_track.hide()
+        self.vocals_track = Track("Vocals")
+        self.vocals_track.hide()
+        self.other_track = Track("Other")
+        self.other_track.hide()
 
         separator_horizontal = QHSeparationLine()
+        separator_horizontal.hide()
 
         layout.addWidget(self.toolbar)
         layout.addWidget(self.timeline)
@@ -60,8 +67,6 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def choose_file(self):
-        print("get_file()")
-
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.ExistingFile)
         dialog.setNameFilter("Audio files (*.mp3)")  # todo: later add option for at least .wav
@@ -76,3 +81,4 @@ class MainWindow(QMainWindow):
             mixture_content = QMediaContent(mixture_url)
 
             self.player.setMedia(mixture_content)
+            self.mixture_track.show()
