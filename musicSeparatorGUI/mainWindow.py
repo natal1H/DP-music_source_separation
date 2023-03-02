@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QAction
-from PyQt5.QtCore import QSize
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QAction, QFileDialog
+from PyQt5.QtCore import QSize, QUrl
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from toolbar import Toolbar
 from timeline import Timeline
 from track import Track
@@ -15,12 +16,11 @@ class MainWindow(QMainWindow):
 
         ### Menu
         self.open_action = QAction("&Open", self)
-        self.open_action.setStatusTip("Open file")
         self.export_action = QAction("Export", self)
-        self.export_action.setStatusTip("Export song")
         menu = self.menuBar()
         file_menu = menu.addMenu("&File")
         file_menu.addAction(self.open_action)
+        self.open_action.triggered.connect(self.choose_file)
         file_menu.addSeparator()
         file_menu.addAction(self.export_action)
         ###
@@ -38,6 +38,10 @@ class MainWindow(QMainWindow):
         self.vocals_track = Track("Vocals")
         self.other_track = Track("Other")
 
+        # Player for playing songs
+        self.player = QMediaPlayer()
+        self.toolbar.set_player(self.player)
+
         separator_horizontal = QHSeparationLine()
 
         layout.addWidget(self.toolbar)
@@ -54,3 +58,21 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
+
+    def choose_file(self):
+        print("get_file()")
+
+        dialog = QFileDialog()
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        dialog.setNameFilter("Audio files (*.mp3)")  # todo: later add option for at least .wav
+        dialog.setViewMode(QFileDialog.Detail)
+
+        if dialog.exec_():
+            mixture_file_name = dialog.selectedFiles()[0]
+            print("Selected mixture filename: ", mixture_file_name)
+
+            # load the audio file
+            mixture_url = QUrl.fromLocalFile(mixture_file_name)
+            mixture_content = QMediaContent(mixture_url)
+
+            self.player.setMedia(mixture_content)
