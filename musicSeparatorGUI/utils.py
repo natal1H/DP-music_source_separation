@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import pydub
-
+from PIL import Image
 
 def read_mp3(filepath):
     """MP3 to numpy array"""
@@ -15,20 +15,25 @@ def read_mp3(filepath):
     return sound.frame_rate, y
 
 
-def save_waveform_plot(mp3_path, save_location):
+def save_waveform_plot(mp3_path, save_location, width_px=1200, height_px=90):
     signal_framerate, signal = read_mp3(mp3_path)
 
     time = np.linspace(0, len(signal) / signal_framerate, num=len(signal))
 
     # set the correct aspect ratio
     dpi = matplotlib.rcParams["figure.dpi"]
-    plt.figure(figsize=(1200 / dpi, 90 / dpi))
+    plt.figure(figsize=(width_px / dpi, height_px / dpi))
     plt.axis('off')
     plt.gca()
     plt.margins(x=0)
     plt.plot(time, signal, "k")
     plt.savefig(save_location, pad_inches=0, bbox_inches='tight')
     plt.close()
+
+    image = Image.open(save_location)
+    new_image = image.resize((width_px, height_px))
+    new_image.save(save_location)
+
 
 
 def changeWidgetColor(widget, color):

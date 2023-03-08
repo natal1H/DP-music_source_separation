@@ -55,8 +55,6 @@ class Track(QWidget):
         self.setFixedHeight(90)
 
     def set_progress_bar_image(self, image_path):
-        #self.progress_bar.setStyleSheet(f"QProgressBar {{background-image : url({image_path}); "
-        self.progress_bar.setStyleSheet(f"QProgressBar {{border-image: url({image_path}) 0 0 0 0 stretch stretch; "
+        self.progress_bar.setStyleSheet(f"QProgressBar {{background-image : url({image_path}); background-repeat: no-repeat; background-position: center; "
                                         f"border : 1px solid #5F5F5F;}}"
                                         "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
-
