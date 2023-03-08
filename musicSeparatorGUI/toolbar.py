@@ -78,9 +78,11 @@ class Toolbar(QWidget):
             if self.player.state() == QMediaPlayer.State.PlayingState:
                 self.playPauseButton.setIcon(QIcon('img/play_icon.png'))
                 self.player.pause()
+                print("Pausing")
             else:
                 self.playPauseButton.setIcon(QIcon('img/pause_icon.png'))
                 self.player.play()
+                print("Playing")
 
     def change_volume(self):
         self.player.setVolume(self.volumeSlider.value())

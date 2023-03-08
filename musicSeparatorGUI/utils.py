@@ -1,6 +1,34 @@
 from PyQt5.QtGui import QPalette
 from PyQt5.QtWidgets import QFrame, QSizePolicy
 from PyQt5.QtCore import QSize
+import matplotlib.pyplot as plt
+import matplotlib
+import numpy as np
+import pydub
+
+
+def read_mp3(filepath):
+    """MP3 to numpy array"""
+    sound = pydub.AudioSegment.from_mp3(filepath)
+    sound = sound.set_channels(1)
+    y = np.array(sound.get_array_of_samples())
+    return sound.frame_rate, y
+
+
+def save_waveform_plot(mp3_path, save_location):
+    signal_framerate, signal = read_mp3(mp3_path)
+
+    time = np.linspace(0, len(signal) / signal_framerate, num=len(signal))
+
+    # set the correct aspect ratio
+    dpi = matplotlib.rcParams["figure.dpi"]
+    plt.figure(figsize=(1200 / dpi, 90 / dpi))
+    plt.axis('off')
+    plt.gca()
+    plt.margins(x=0)
+    plt.plot(time, signal, "k")
+    plt.savefig(save_location, pad_inches=0, bbox_inches='tight')
+    plt.close()
 
 
 def changeWidgetColor(widget, color):

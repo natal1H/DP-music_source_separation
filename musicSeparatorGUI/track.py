@@ -32,11 +32,13 @@ class Track(QWidget):
         muteButton.setStyleSheet("background-color: #D9D9D9; border: none;")
 
         # Progress bar
-        progress_bar = QProgressBar()
-        progress_bar.setFormat("")
-        progress_bar.setValue(30)  # todo - temporary
-        progress_bar.setFixedSize(QSize(1020, 90))
-        progress_bar.setStyleSheet(f"QProgressBar {{background-image : url({imageUrl}); border : 1px solid #5F5F5F;}}"
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setFormat("")
+        self.progress_bar.setValue(30)  # todo - temporary
+        self.progress_bar.setFixedSize(QSize(1020, 90))
+        #progress_bar.setStyleSheet(f"QProgressBar {{background-image : url({imageUrl}); border : 1px solid #5F5F5F;}}"
+        #                           "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
+        self.progress_bar.setStyleSheet(f"QProgressBar {{border : 1px solid #5F5F5F;}}"
                                    "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
 
         # Add widgets to layouts
@@ -44,10 +46,17 @@ class Track(QWidget):
         infoLayout.addWidget(muteButton, alignment=Qt.AlignHCenter)
         infoFrame.setLayout(infoLayout)
         mainLayout.addWidget(infoFrame)
-        mainLayout.addWidget(progress_bar)
+        mainLayout.addWidget(self.progress_bar)
 
         self.setLayout(mainLayout)
         mainLayout.addStretch(1)  # adds a spacer that expands horizontally from the left to the right
 
         # Set fixed height
         self.setFixedHeight(90)
+
+    def set_progress_bar_image(self, image_path):
+        #self.progress_bar.setStyleSheet(f"QProgressBar {{background-image : url({image_path}); "
+        self.progress_bar.setStyleSheet(f"QProgressBar {{border-image: url({image_path}) 0 0 0 0 stretch stretch; "
+                                        f"border : 1px solid #5F5F5F;}}"
+                                        "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
+

@@ -4,17 +4,21 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from toolbar import Toolbar
 from timeline import Timeline
 from track import Track
-from utils import QHSeparationLine
+from utils import QHSeparationLine, save_waveform_plot
+import tempfile
+import os
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, temp_dir: tempfile.TemporaryFile):
         super().__init__()
+
+        self.temp_dir = temp_dir
 
         self.setWindowTitle("Music Separator")
         self.setMinimumSize(QSize(1120, 670))
 
-        ### Menu
+        # Menu
         self.open_action = QAction("&Open", self)
         self.export_action = QAction("Export", self)
         menu = self.menuBar()
@@ -81,4 +85,8 @@ class MainWindow(QMainWindow):
             mixture_content = QMediaContent(mixture_url)
 
             self.player.setMedia(mixture_content)
+            # create the waveform plot of mixture
+            save_waveform_plot(mixture_file_name, os.path.join(self.temp_dir.name, "mixture.png"))
+            self.mixture_track.set_progress_bar_image(os.path.join(self.temp_dir.name, "mixture.png"))
+
             self.mixture_track.show()

@@ -1,17 +1,28 @@
-from PyQt5.QtWidgets import QApplication, QFrame, QSizePolicy
-from PyQt5.QtCore import QSize
+from PyQt5.QtWidgets import QApplication
 from mainWindow import MainWindow
-
+import tempfile
 import sys
 
 
+# The main application
+class Application(QApplication):
+
+    def __init__(self, args):
+        QApplication.__init__(self, args)
+        self.temp_dir = tempfile.TemporaryDirectory()
+        print(self.temp_dir.name)  # todo remove
+
+    def clean_up(self):
+        print('closing')
+        self.temp_dir.cleanup()
 
 
+# Start Qt event loop
+if __name__ == '__main__':
+    app = Application(sys.argv)
+    app.aboutToQuit.connect(app.clean_up)
 
-app = QApplication(sys.argv)
+    window = MainWindow(app.temp_dir)
+    window.show()
 
-window = MainWindow()
-window.show()
-
-# Start the event loop
-app.exec()
+    app.exec_()
