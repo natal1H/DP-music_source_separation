@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QPushButton, QWidget, QHBoxLayout, QVBoxLayout, QLab
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QColor, QIcon
 from utils import changeWidgetColor
-
+from player import Player
 
 class Track(QWidget):
     def __init__(self, name, imageUrl="img/tmp_soundwave.png"):

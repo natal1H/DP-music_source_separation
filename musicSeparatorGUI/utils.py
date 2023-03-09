@@ -44,10 +44,10 @@ def changeWidgetColor(widget, color):
 
 
 def formatTime(ms: int):
-    # TODO: add option for hours
     seconds = ms / 1000
-    minutes = int(seconds / 60)
+    minutes = str(int(seconds / 60))
     seconds = int(seconds % 60)
+    seconds = "0" + str(seconds) if seconds < 10 else str(seconds)
     return f"{minutes}:{seconds}"
 
 

@@ -9,6 +9,7 @@ class Timeline(QWidget):
         super().__init__()
         self.player = player
         self.player.durationChanged.connect(self.change_total_time)
+        self.player.positionChanged.connect(self.change_current_time)
 
         # Fill with color to see borders
         changeWidgetColor(self, QColor("#E8E8E8"))
@@ -30,4 +31,9 @@ class Timeline(QWidget):
 
     def change_total_time(self):
         self.totalTimeLabel.setText(formatTime(self.player.duration()))
+        print("Song duration:", self.player.duration(), "ms")
 
+    def change_current_time(self):
+        pos_ms = self.player.position()
+        print("Position changed:", pos_ms)
+        self.currentTimeLabel.setText(formatTime(pos_ms))
