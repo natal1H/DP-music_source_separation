@@ -1,11 +1,11 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
-from PyQt5.QtMultimedia import QMediaPlayer
 from utils import changeWidgetColor, formatTime
+from player import Player
 
 class Timeline(QWidget):
-    def __init__(self, player: QMediaPlayer):
+    def __init__(self, player: Player):
         super().__init__()
         self.player = player
         self.player.durationChanged.connect(self.change_total_time)

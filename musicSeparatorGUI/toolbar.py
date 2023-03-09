@@ -3,11 +3,11 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QColor, QIcon, QPixmap
 from PyQt5.QtMultimedia import QMediaPlayer
 from utils import changeWidgetColor
-
+from player import Player
 
 class Toolbar(QWidget):
 
-    def __init__(self, player: QMediaPlayer):
+    def __init__(self, player: Player):
         super().__init__()
 
         # Media player
@@ -23,24 +23,30 @@ class Toolbar(QWidget):
         self.playPauseButton = QPushButton(clicked=self.play_pause_song)
         self.playPauseButton.setFixedSize(QSize(30, 30))
         self.playPauseButton.setIcon(QIcon('img/play_icon.png'))
-        self.playPauseButton.setStyleSheet("background-color: #A5A5A5; border-radius: 4px;")
+        self.playPauseButton.setStyleSheet("QPushButton {background-color: #A5A5A5; border-radius: 4px;}"
+                                           "QPushButton::hover {background-color : #8C8C8C;}")
 
         # Jump to beginning button
-        self.jumpToBeginningButton = QPushButton()
+        self.jumpToBeginningButton = QPushButton(clicked=self.jump_to_beginning)
         self.jumpToBeginningButton.setFixedSize(QSize(30, 30))
         self.jumpToBeginningButton.setIcon(QIcon('img/to_start.png'))
-        self.jumpToBeginningButton.setStyleSheet("background-color: #A5A5A5; border-radius: 4px;")
+        self.jumpToBeginningButton.setStyleSheet("QPushButton {background-color: #A5A5A5; border-radius: 4px;}"
+                                           "QPushButton::hover {background-color : #8C8C8C;}")
 
         # Jump to end button
         self.jumpToEndButton = QPushButton()
         self.jumpToEndButton.setFixedSize(QSize(30, 30))
         self.jumpToEndButton.setIcon(QIcon('img/to_end.png'))
-        self.jumpToEndButton.setStyleSheet("background-color: #A5A5A5; border-radius: 4px;")
+        self.jumpToEndButton.setStyleSheet("QPushButton {background-color: #A5A5A5; border-radius: 4px;}"
+                                           "QPushButton::hover {background-color : #8C8C8C;}")
 
         # Split button
-        self.splitButton = QPushButton("SPLIT")
+        self.splitButton = QPushButton("SPLIT", clicked=self.split_song)
         self.splitButton.setFixedSize(QSize(60, 30))
         self.splitButton.setStyleSheet("color: #414141; background-color: #A5A5A5; border-radius: 4px;")
+        self.splitButton.setStyleSheet("QPushButton {background-color: #A5A5A5; border-radius: 4px;}"
+                                           "QPushButton::hover {background-color : #8C8C8C; color: white}")
+
 
         # Master volume slider, volume icon & labels
         self.volumeSlider = QSlider(Qt.Horizontal)
@@ -76,13 +82,20 @@ class Toolbar(QWidget):
         # Check if player has loaded audio
         if self.player.isAudioAvailable():
             if self.player.state() == QMediaPlayer.State.PlayingState:
-                self.playPauseButton.setIcon(QIcon('img/play_icon.png'))
                 self.player.pause()
+                self.playPauseButton.setIcon(QIcon('img/play_icon.png'))
                 print("Pausing")
             else:
-                self.playPauseButton.setIcon(QIcon('img/pause_icon.png'))
                 self.player.play()
+                self.playPauseButton.setIcon(QIcon('img/pause_icon.png'))
                 print("Playing")
 
     def change_volume(self):
         self.player.setVolume(self.volumeSlider.value())
+
+    def split_song(self):
+        print("Splitting song")
+
+    def jump_to_beginning(self):
+        print("Jumping to beginning of the song")
+        self.player.setPosition(0)

@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QAction, QFileDialog
 from PyQt5.QtCore import QSize, QUrl
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtMultimedia import QMediaContent
 from toolbar import Toolbar
 from timeline import Timeline
 from track import Track
+from player import Player
 from utils import QHSeparationLine, save_waveform_plot
 import tempfile
 import os
@@ -34,10 +35,12 @@ class MainWindow(QMainWindow):
         layout.setSpacing(0)
 
         # Player for playing songs
-        self.player = QMediaPlayer()
+        self.player = Player()
         self.player.setVolume(50)
 
         self.toolbar = Toolbar(self.player)
+        self.toolbar.setEnabled(False)
+
         self.timeline = Timeline(self.player)
         self.mixture_track = Track("Mixture")
         self.mixture_track.hide()
@@ -90,3 +93,7 @@ class MainWindow(QMainWindow):
             self.mixture_track.set_progress_bar_image(os.path.join(self.temp_dir.name, "mixture.png"))
 
             self.mixture_track.show()
+
+            # Enable toolbar now
+            self.toolbar.setEnabled(True)
+

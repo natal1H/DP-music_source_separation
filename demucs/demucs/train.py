@@ -55,7 +55,10 @@ def get_solver(args, model_only=False):
 
     # torch also initialize cuda seed if available
     if torch.cuda.is_available():
+        print("DEBUG: Cuda is available")
         model.cuda()
+    else:
+        print("DEBUG: Cuda is NOT available")
 
     # optimizer
     if args.optim.optim == 'adam':
