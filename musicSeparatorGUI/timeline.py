@@ -31,9 +31,9 @@ class Timeline(QWidget):
 
     def change_total_time(self):
         self.totalTimeLabel.setText(formatTime(self.player.duration()))
-        print("Song duration:", self.player.duration(), "ms")
+        #print("Song duration:", self.player.duration(), "ms")
 
     def change_current_time(self):
         pos_ms = self.player.position()
-        print("Position changed:", pos_ms)
+        #print("Position changed:", pos_ms)
         self.currentTimeLabel.setText(formatTime(pos_ms))

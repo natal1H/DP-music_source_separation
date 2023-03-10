@@ -11,7 +11,7 @@ import os
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, temp_dir: tempfile.TemporaryFile):
+    def __init__(self, temp_dir: tempfile.TemporaryFile, player: Player):
         super().__init__()
 
         self.temp_dir = temp_dir
@@ -35,24 +35,24 @@ class MainWindow(QMainWindow):
         layout.setSpacing(0)
 
         # Player for playing songs
-        self.player = Player()
+        self.player = player
         self.player.setVolume(50)
 
         self.toolbar = Toolbar(self.player)
         self.toolbar.setEnabled(False)
 
         self.timeline = Timeline(self.player)
-        self.mixture_track = Track("Mixture")
+        self.mixture_track = Track("Mixture", self.player)
         self.mixture_track.hide()
-        self.bass_track = Track("Bass")
+        self.bass_track = Track("Bass", self.player)
         self.bass_track.hide()
-        self.drums_track = Track("Drums")
+        self.drums_track = Track("Drums", self.player)
         self.drums_track.hide()
-        self.guitars_track = Track("Guitars")
+        self.guitars_track = Track("Guitars", self.player)
         self.guitars_track.hide()
-        self.vocals_track = Track("Vocals")
+        self.vocals_track = Track("Vocals", self.player)
         self.vocals_track.hide()
-        self.other_track = Track("Other")
+        self.other_track = Track("Other", self.player)
         self.other_track.hide()
 
         separator_horizontal = QHSeparationLine()
