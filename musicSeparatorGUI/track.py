@@ -13,7 +13,6 @@ class Track(QWidget):
         self.player.positionChanged.connect(self.change_progress_bar_pos)
         self.player.durationChanged.connect(self.change_progress_bar_range)
 
-
         # Fill with color to see borders
         changeWidgetColor(self, QColor("#E8E8E8"))
 
@@ -42,7 +41,8 @@ class Track(QWidget):
         self.progress_bar.setFormat("")
         self.progress_bar.setFixedSize(QSize(1020, 90))
         self.progress_bar.setStyleSheet(f"QProgressBar {{border : 1px solid #5F5F5F;}}"
-                                   "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
+                                        "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
+        #self.progress_bar.mousePressEvent(self.progress_bar_clicked)
 
         # Add widgets to layouts
         infoLayout.addWidget(trackName)
@@ -58,16 +58,20 @@ class Track(QWidget):
         self.setFixedHeight(90)
 
     def set_progress_bar_image(self, image_path):
-        self.progress_bar.setStyleSheet(f"QProgressBar {{background-image : url({image_path}); background-repeat: no-repeat; background-position: center; "
-                                        f"border : 1px solid #5F5F5F;}}"
-                                        "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
+        self.progress_bar.setStyleSheet(
+            f"QProgressBar {{background-image : url({image_path}); background-repeat: no-repeat; "
+            f"background-position: center; border : 1px solid #5F5F5F;}}"
+            "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
 
     def change_progress_bar_range(self):
         self.progress_bar.setRange(0, self.player.duration())
         self.progress_bar.setValue(0)
-        #print("Progress bar max: ", self.progress_bar.maximum())
+        # print("Progress bar max: ", self.progress_bar.maximum())
 
     def change_progress_bar_pos(self):
         pos_ms = self.player.position()
-        #print("Track: Position changed:", pos_ms)
+        # print("Track: Position changed:", pos_ms)
         self.progress_bar.setValue(pos_ms)
+
+    # def progress_bar_clicked(self):
+    #    print("Progress bar clicked")

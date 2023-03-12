@@ -12,9 +12,9 @@ import subprocess
 import torch as th
 import torchaudio as ta
 from dora.log import fatal
-from audio import AudioFile, convert_audio, save_audio
-from pretrained import get_model_from_args, add_model_flags, ModelLoadingError
-from apply import apply_model
+from demucs.audio import AudioFile, convert_audio, save_audio
+from demucs.pretrained import get_model_from_args, add_model_flags, ModelLoadingError
+from demucs.apply import apply_model
 
 
 def load_track(track, audio_channels, samplerate):
@@ -79,7 +79,42 @@ def main():
                         default=320,
                         type=int,
                         help="Bitrate of converted mp3.")
-
+    parser.add_argument("--shifts",
+                        default=1,
+                        type=int,
+                        help="Number of random shifts for equivariant stabilization."
+                             "Increase separation time but improves quality for Demucs. 10 was used "
+                             "in the original paper.")
+    parser.add_argument("--overlap",
+                        default=0.25,
+                        type=float,
+                        help="Overlap between the splits.")
+    split_group = parser.add_mutually_exclusive_group()
+    split_group.add_argument("--no-split",
+                             action="store_false",
+                             dest="split",
+                             default=True,
+                             help="Doesn't split audio in chunks. "
+                                  "This can use large amounts of memory.")
+    split_group.add_argument("--segment", type=int,
+                             help="Set split size of each chunk. "
+                                  "This can help save memory of graphic card. ")
+    parser.add_argument("--two-stems",
+                        dest="stem", metavar="STEM",
+                        help="Only separate audio into {STEM} and no_{STEM}. ")
+    parser.add_argument("-j", "--jobs",
+                        default=0,
+                        type=int,
+                        help="Number of jobs. This can increase memory usage but will "
+                             "be much faster when multiple cores are available.")
+    parser.add_argument("--clip-mode", default="rescale", choices=["rescale", "clamp"],
+                        help="Strategy for avoiding clipping: rescaling entire signal "
+                             "if necessary  (rescale) or hard clipping (clamp).")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--int24", action="store_true",
+                       help="Save wav output as 24 bits wav.")
+    group.add_argument("--float32", action="store_true",
+                       help="Save wav output as float32 (2x bigger).")
     args = parser.parse_args()
 
     try:

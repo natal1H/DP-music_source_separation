@@ -1,9 +1,6 @@
-defaults:
-  - _self_
-
 dset:
-  remixdset: ../datasets/remix_dataset #../datasets/remixes
-  medleydb:
+  remixdset: ../datasets/remixes_10
+  medleydb: null
   db_samplerate: 44100
   segment: 6
   shift: 1
@@ -11,81 +8,71 @@ dset:
   channels: 2
   normalize: true
   metadata: ../metadata
-  sources: ['drums', 'bass', 'other', 'vocals', 'guitars']
-
-epochs: 10 # 360
-batch_size: 8
-max_batches:  # limit the number of batches per epoch, useful for debugging
-              # or if your dataset is gigantic.
-
+  sources:
+  - drums
+  - bass
+  - other
+  - vocals
+  - guitars
+epochs: 5
+batch_size: 16
+max_batches: null
 optim:
-  lr: 3e-4
+  lr: 0.0003
   momentum: 0.9
   beta2: 0.999
-  loss: l1    # l1 or mse
+  loss: l1
   optim: adam
   weight_decay: 0
   clip_grad: 0
-
 seed: 42
-weights: [1., 1., 1., 1., 1.]  # weights over each source for the training/valid loss.
-flag:
+weights:
+- 1.0
+- 1.0
+- 1.0
+- 1.0
+- 1.0
+flag: null
 debug: false
 valid_apply: false
-save_every:
-
+save_every: 1
 misc:
   verbose: true
   show: false
-  num_workers: 1 #10
+  num_workers: 0
   num_prints: 4
-
-model_segment:  # override the segment parameter for the model, usually 5 times the training segment.
-
+model_segment: null
 model: demucs
-demucs:  # see demucs/demucs.py for a detailed description
-  # Channels
-  channels: 32
+demucs:
+  channels: 24
   growth: 2
-  # Main structure
   depth: 6
   rewrite: true
   lstm_layers: 0
-  # Convolutions
   kernel_size: 8
   stride: 4
   context: 1
-  # Activations
   gelu: true
   glu: true
-  # Normalization
   norm_groups: 4
   norm_starts: 4
-  # DConv residual branch
   dconv_depth: 2
-  dconv_mode: 1  # 1 = branch in encoder, 2 = in decoder, 3 = in both.
+  dconv_mode: 1
   dconv_comp: 4
   dconv_attn: 4
   dconv_lstm: 4
-  dconv_init: 1e-4
-  # Pre/post treatment
+  dconv_init: 0.0001
   resample: true
   normalize: false
-  # Weight init
   rescale: 0.1
-
-quant:  # quantization hyper params
-  diffq:    # diffq penalty, typically 1e-4 or 3e-4
-  qat:      # use QAT with a fixed number of bits (not as good as diffq)
+quant:
+  diffq: null
+  qat: null
   min_size: 0.2
   group_size: 8
-
-# List of decay for EMA at batch or epoch level, e.g. 0.999.
-# Batch level EMA are kept on GPU for speed.
 ema:
   epoch: []
   batch: []
-
 augment:
   shift_same: false
   repitch:
@@ -99,14 +86,12 @@ augment:
     min: 0.25
     max: 1.25
   flip: true
-
-continue_from:  # continue from other XP, give the XP Dora signature.
-continue_pretrained:   # signature of a pretrained XP, this cannot be a bag of models.
-pretrained_repo:   # repo for pretrained model (default is official AWS)
+continue_from: 2cb7538f
+continue_pretrained: null
+pretrained_repo: null
 continue_best: false
 continue_opt: false
-
-svd:  # see svd.py for documentation
+svd:
   penalty: 0
   min_size: 0.1
   dim: 1
@@ -116,14 +101,13 @@ svd:  # see svd.py for documentation
   conv_only: false
   convtr: false
   bs: 1
-
 test:
-  save: True # originally False
-  best: False # originally True
-  workers: 2
+  save: true
+  best: false
+  workers: 0
   every: 20
   split: true
   shifts: 1
   overlap: 0.25
   sdr: true
-  metric: 'loss'  # metric used for best model selection on the valid set, can also be nsdr
+  metric: loss

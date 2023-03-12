@@ -8,7 +8,7 @@ from pathlib import Path
 import typing as tp
 from dora.log import fatal
 import logging
-from .repo import LocalRepo, ModelOnlyRepo, BagOnlyRepo, AnyModelRepo
+from .repo import LocalRepo, ModelOnlyRepo, BagOnlyRepo, AnyModelRepo, ModelLoadingError
 
 logger = logging.getLogger(__name__)
 
@@ -39,3 +39,10 @@ def get_model(name: str,
     bag_repo = BagOnlyRepo(repo, model_repo)
     any_repo = AnyModelRepo(model_repo, bag_repo)
     return any_repo.get_model(name)
+
+
+def get_model_from_args(args):
+    """
+    Load local model package or pre-trained model.
+    """
+    return get_model(name=args.name, repo=args.repo)

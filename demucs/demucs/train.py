@@ -55,10 +55,7 @@ def get_solver(args, model_only=False):
 
     # torch also initialize cuda seed if available
     if torch.cuda.is_available():
-        print("DEBUG: Cuda is available")
         model.cuda()
-    else:
-        print("DEBUG: Cuda is NOT available")
 
     # optimizer
     if args.optim.optim == 'adam':
@@ -119,6 +116,21 @@ def main(args):
 
     solver = get_solver(args, False)
     solver.train()
+
+
+def get_solver_from_sig(sig, model_only=False):
+    inst = GlobalHydra.instance()
+    hyd = None
+    if inst.is_initialized():
+        hyd = inst.hydra
+        inst.clear()
+    xp = main.get_xp_from_sig(sig)
+    if hyd is not None:
+        inst.clear()
+        inst.initialize(hyd)
+
+    with xp.enter(stack=True):
+        return get_solver(xp.cfg, model_only)
 
 
 if __name__ == "__main__":

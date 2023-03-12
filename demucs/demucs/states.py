@@ -15,6 +15,19 @@ from omegaconf import OmegaConf
 from pathlib import Path
 import warnings
 import inspect
+import hashlib
+import io
+
+
+def save_with_checksum(content, path):
+    """Save the given value on disk, along with a sha256 hash.
+    Should be used with the output of either `serialize_model` or `get_state`."""
+    buf = io.BytesIO()
+    torch.save(content, buf)
+    sig = hashlib.sha256(buf.getvalue()).hexdigest()[:8]
+
+    path = path.parent / (path.stem + "-" + sig + path.suffix)
+    path.write_bytes(buf.getvalue())
 
 
 def get_quantizer(model, args, optimizer=None):
