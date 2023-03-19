@@ -1,0 +1,113 @@
+dset:
+  remixdset: ../datasets/remixes_10
+  medleydb: null
+  db_samplerate: 44100
+  segment: 6
+  shift: 1
+  samplerate: 44100
+  channels: 2
+  normalize: true
+  metadata: ../metadata
+  sources:
+  - drums
+  - bass
+  - other
+  - vocals
+  - guitars
+epochs: 5
+batch_size: 16
+max_batches: null
+optim:
+  lr: 0.0003
+  momentum: 0.9
+  beta2: 0.999
+  loss: l1
+  optim: adam
+  weight_decay: 0
+  clip_grad: 0
+seed: 42
+weights:
+- 1.0
+- 1.0
+- 1.0
+- 1.0
+- 1.0
+flag: null
+debug: false
+valid_apply: false
+save_every: 1
+misc:
+  verbose: true
+  show: false
+  num_workers: 0
+  num_prints: 4
+model_segment: null
+model: demucs
+demucs:
+  channels: 24
+  growth: 2
+  depth: 6
+  rewrite: true
+  lstm_layers: 0
+  kernel_size: 8
+  stride: 4
+  context: 1
+  gelu: true
+  glu: true
+  norm_groups: 4
+  norm_starts: 4
+  dconv_depth: 2
+  dconv_mode: 1
+  dconv_comp: 4
+  dconv_attn: 4
+  dconv_lstm: 4
+  dconv_init: 0.0001
+  resample: true
+  normalize: false
+  rescale: 0.1
+quant:
+  diffq: null
+  qat: null
+  min_size: 0.2
+  group_size: 8
+ema:
+  epoch: []
+  batch: []
+augment:
+  shift_same: false
+  repitch:
+    proba: 0.2
+    max_tempo: 12
+  remix:
+    proba: 1
+    group_size: 4
+  scale:
+    proba: 1
+    min: 0.25
+    max: 1.25
+  flip: true
+continue_from: 2cb7538f
+continue_pretrained: null
+pretrained_repo: null
+continue_best: false
+continue_opt: false
+svd:
+  penalty: 0
+  min_size: 0.1
+  dim: 1
+  niters: 2
+  powm: false
+  proba: 1
+  conv_only: false
+  convtr: false
+  bs: 1
+test:
+  save: true
+  best: false
+  workers: 0
+  every: 20
+  split: true
+  shifts: 1
+  overlap: 0.25
+  sdr: true
+  metric: loss

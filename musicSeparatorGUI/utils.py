@@ -6,6 +6,8 @@ import matplotlib
 import numpy as np
 import pydub
 from PIL import Image
+from pydub import AudioSegment
+from pydub.playback import play
 
 def read_mp3(filepath):
     """MP3 to numpy array"""
@@ -51,6 +53,15 @@ def formatTime(ms: int):
     return f"{minutes}:{seconds}"
 
 
+def overlay_tracks(tracks_locations, save_location):
+    audios = []
+    for track_location in tracks_locations:
+        audios.append(AudioSegment.from_file(track_location))
+    mixed = audios[0]
+    for audio in audios[1:]:
+        mixed = mixed.overlay(audio)
+    mixed.export(save_location + "/mixed.mp3", format='mp3')
+
 class QHSeparationLine(QFrame):
     """
     Horizontal separation line
@@ -62,3 +73,4 @@ class QHSeparationLine(QFrame):
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         self.setLineWidth(2)
         self.setContentsMargins(15, 0, 15, 0)
+

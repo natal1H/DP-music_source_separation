@@ -31,10 +31,12 @@ class Track(QWidget):
 
         trackName = QLabel(name)
         trackName.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
-        muteButton = QPushButton()
-        muteButton.setFixedSize(QSize(20, 20))
-        muteButton.setIcon(QIcon('img/mute_icon.png'))
-        muteButton.setStyleSheet("background-color: #D9D9D9; border: none;")
+
+        if name != "Mixture":
+            self.muteButton = QPushButton()
+            self.muteButton.setFixedSize(QSize(20, 20))
+            self.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
+            self.muteButton.setStyleSheet("background-color: #D9D9D9; border: none;")
 
         # Progress bar
         self.progress_bar = QProgressBar()
@@ -42,11 +44,11 @@ class Track(QWidget):
         self.progress_bar.setFixedSize(QSize(1020, 90))
         self.progress_bar.setStyleSheet(f"QProgressBar {{border : 1px solid #5F5F5F;}}"
                                         "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
-        #self.progress_bar.mousePressEvent(self.progress_bar_clicked)
 
         # Add widgets to layouts
         infoLayout.addWidget(trackName)
-        infoLayout.addWidget(muteButton, alignment=Qt.AlignHCenter)
+        if name != "Mixture":
+            infoLayout.addWidget(self.muteButton, alignment=Qt.AlignHCenter)
         infoFrame.setLayout(infoLayout)
         mainLayout.addWidget(infoFrame)
         mainLayout.addWidget(self.progress_bar)
@@ -66,12 +68,7 @@ class Track(QWidget):
     def change_progress_bar_range(self):
         self.progress_bar.setRange(0, self.player.duration())
         self.progress_bar.setValue(0)
-        # print("Progress bar max: ", self.progress_bar.maximum())
 
     def change_progress_bar_pos(self):
         pos_ms = self.player.position()
-        # print("Track: Position changed:", pos_ms)
         self.progress_bar.setValue(pos_ms)
-
-    # def progress_bar_clicked(self):
-    #    print("Progress bar clicked")
