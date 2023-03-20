@@ -1,7 +1,6 @@
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtCore import Qt
 
-
 # TODO: ref
 # https://stackoverflow.com/questions/63232236/how-qmediaplayer-setposition-works-for-mp3
 
@@ -29,3 +28,8 @@ class Player(QMediaPlayer):
             self.seekableChanged.disconnect(self.delaySetPosition)
         except:
             pass
+
+    def movePositionByMs(self, ms):
+        current_position = self.position()
+        new_position = max(min(current_position + ms, self.duration()), 0)
+        self.setPosition(new_position)

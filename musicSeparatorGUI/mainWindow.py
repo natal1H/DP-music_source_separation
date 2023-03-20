@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QAction, QFileDia
 from PyQt5.QtCore import QSize, QUrl
 from PyQt5.QtMultimedia import QMediaContent
 from PyQt5.QtGui import QIcon
+from PyQt5.Qt import Qt
 from toolbar import Toolbar
 from timeline import Timeline
 from track import Track
@@ -21,7 +22,7 @@ class MainWindow(QMainWindow):
         self.active_tracks = []
 
         self.setWindowTitle("Music Separator")
-        self.setMinimumSize(QSize(1120, 670))
+        self.setMinimumSize(QSize(1120, 580))
 
         # Menu
         self.open_action = QAction("&Open", self)
@@ -32,7 +33,6 @@ class MainWindow(QMainWindow):
         self.open_action.triggered.connect(self.choose_file)
         file_menu.addSeparator()
         file_menu.addAction(self.export_action)
-        ###
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Left, top, right, bottom
@@ -63,15 +63,10 @@ class MainWindow(QMainWindow):
         self.separator_horizontal = QHSeparationLine()
         self.separator_horizontal.hide()
 
-        layout.addWidget(self.toolbar)
-        layout.addWidget(self.timeline)
-        layout.addWidget(self.mixture_track)
-        layout.addWidget(self.separator_horizontal)
-        layout.addWidget(self.bass_track)
-        layout.addWidget(self.drums_track)
-        layout.addWidget(self.guitars_track)
-        layout.addWidget(self.vocals_track)
-        layout.addWidget(self.other_track)
+        # Add widgets to layout
+        for widget in [self.toolbar, self.timeline, self.mixture_track, self.bass_track, self.drums_track, self.guitars_track, self.vocals_track, self.other_track]:
+            layout.addWidget(widget)
+
         layout.addStretch(1)
 
         widget = QWidget()
@@ -86,7 +81,7 @@ class MainWindow(QMainWindow):
 
         if dialog.exec_():
             self.mixture_file_name = dialog.selectedFiles()[0]
-            print("Selected mixture filename: ", self.mixture_file_name)
+
             # load the audio file
             mixture_url = QUrl.fromLocalFile(self.mixture_file_name)
             mixture_content = QMediaContent(mixture_url)
@@ -102,8 +97,6 @@ class MainWindow(QMainWindow):
             self.toolbar.setEnabled(True)
 
     def split_song(self):
-        print("Split song called from main window.")
-
         # Stop playing the mixture song
         self.player.stop()
         self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
@@ -114,39 +107,17 @@ class MainWindow(QMainWindow):
         self.mixture_track.hide()
 
         # Enable other tracks & create plots
-        # TODO uncomment
-        save_waveform_plot(os.path.join(self.temp_dir.name, "bass.mp3"), os.path.join(self.temp_dir.name, "bass.png"))
-        save_waveform_plot(os.path.join(self.temp_dir.name, "drums.mp3"), os.path.join(self.temp_dir.name, "drums.png"))
-        save_waveform_plot(os.path.join(self.temp_dir.name, "guitars.mp3"), os.path.join(self.temp_dir.name, "guitars.png"))
-        save_waveform_plot(os.path.join(self.temp_dir.name, "vocals.mp3"), os.path.join(self.temp_dir.name, "vocals.png"))
-        save_waveform_plot(os.path.join(self.temp_dir.name, "other.mp3"), os.path.join(self.temp_dir.name, "other.png"))
+        for instrument, track_widget in [["bass", self.bass_track], ["drums", self.drums_track], ["guitars", self.guitars_track], ["vocals", self.vocals_track], ["other", self.other_track]]:
+            save_waveform_plot(os.path.join(self.temp_dir.name, instrument + ".mp3"), os.path.join(self.temp_dir.name, instrument + ".png"))
+            track_widget.set_progress_bar_image(os.path.join(self.temp_dir.name, instrument + ".png"))
+            track_widget.muteButton.clicked.connect(self.toggle_track)
+            track_widget.show()
 
-        self.bass_track.set_progress_bar_image(os.path.join(self.temp_dir.name, "bass.png"))
-        self.drums_track.set_progress_bar_image(os.path.join(self.temp_dir.name, "drums.png"))
-        self.guitars_track.set_progress_bar_image(os.path.join(self.temp_dir.name, "guitars.png"))
-        self.vocals_track.set_progress_bar_image(os.path.join(self.temp_dir.name, "vocals.png"))
-        self.other_track.set_progress_bar_image(os.path.join(self.temp_dir.name, "other.png"))
-
-        self.bass_track.muteButton.clicked.connect(self.toggle_bass_track)
-        self.drums_track.muteButton.clicked.connect(self.toggle_drums_track)
-        self.guitars_track.muteButton.clicked.connect(self.toggle_guitars_track)
-        self.vocals_track.muteButton.clicked.connect(self.toggle_vocals_track)
-        self.other_track.muteButton.clicked.connect(self.toggle_other_track)
-
-
-        self.bass_track.show()
-        self.drums_track.show()
-        self.guitars_track.show()
-        self.vocals_track.show()
-        self.other_track.show()
-
-        self.active_tracks = ["bass", "drums", "guitars", "vocals", "other"]
         # overlay all tracks into one
-        tmp_locs = [os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks]
-        overlay_tracks(tmp_locs, self.temp_dir.name)
+        self.active_tracks = ["bass", "drums", "guitars", "vocals", "other"]
+        overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks], self.temp_dir.name)
 
         # load new media
-        # load the audio file
         split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
         split_mix_content = QMediaContent(split_mix_url)
 
@@ -156,80 +127,41 @@ class MainWindow(QMainWindow):
         self.toolbar.splitButton.setEnabled(False)
         print("End split song")
 
-    def toggle_bass_track(self):
-        self.player.stop()
-        if "bass" in self.active_tracks:
-            print("Mute bass track")
-            self.active_tracks.remove("bass")
-            self.bass_track.muteButton.setIcon(QIcon('img/mute_icon.png'))
-        else:
-            print("Unmute bass track")
-            self.active_tracks.append("bass")
-            self.bass_track.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
-        tmp_locs = [os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks]
-        overlay_tracks(tmp_locs, self.temp_dir.name)
-        split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
-        split_mix_content = QMediaContent(split_mix_url)
-        self.player.setMedia(split_mix_content)
+    def toggle_track(self):
+        track_widget = self.sender().parent().parent()
+        instrument_name = track_widget.name.lower()
 
-    def toggle_drums_track(self):
+        prev_position = self.player.position()
         self.player.stop()
-        if "drums" in self.active_tracks:
-            print("Mute drums track")
-            self.active_tracks.remove("drums")
-            self.drums_track.muteButton.setIcon(QIcon('img/mute_icon.png'))
+        self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
+        if instrument_name in self.active_tracks:
+            self.active_tracks.remove(instrument_name)
+            track_widget.muteButton.setIcon(QIcon('img/mute_icon.png'))
         else:
-            print("Unmute drums track")
-            self.active_tracks.append("drums")
-            self.drums_track.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
-        tmp_locs = [os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks]
-        overlay_tracks(tmp_locs, self.temp_dir.name)
+            self.active_tracks.append(instrument_name)
+            track_widget.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
+        overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks], self.temp_dir.name)
         split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
         split_mix_content = QMediaContent(split_mix_url)
         self.player.setMedia(split_mix_content)
+        self.player.setPosition(prev_position)
 
-    def toggle_guitars_track(self):
-        self.player.stop()
-        if "guitars" in self.active_tracks:
-            print("Mute guitars track")
-            self.active_tracks.remove("guitars")
-            self.guitars_track.muteButton.setIcon(QIcon('img/mute_icon.png'))
-        else:
-            print("Unmute guitars track")
-        tmp_locs = [os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks]
-        overlay_tracks(tmp_locs, self.temp_dir.name)
-        split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
-        split_mix_content = QMediaContent(split_mix_url)
-        self.player.setMedia(split_mix_content)
+    def keyPressEvent(self, event):
+        key = event.key()
 
-    def toggle_vocals_track(self):
-        self.player.stop()
-        if "vocals" in self.active_tracks:
-            print("Mute vocals track")
-            self.active_tracks.remove("vocals")
-            self.vocals_track.muteButton.setIcon(QIcon('img/mute_icon.png'))
-        else:
-            print("Unmute vocals track")
-            self.active_tracks.append("vocals")
-            self.vocals_track.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
-        tmp_locs = [os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks]
-        overlay_tracks(tmp_locs, self.temp_dir.name)
-        split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
-        split_mix_content = QMediaContent(split_mix_url)
-        self.player.setMedia(split_mix_content)
-
-    def toggle_other_track(self):
-        self.player.stop()
-        if "other" in self.active_tracks:
-            print("Mute other track")
-            self.active_tracks.remove("other")
-            self.other_track.muteButton.setIcon(QIcon('img/mute_icon.png'))
-        else:
-            print("Unmute other track")
-            self.active_tracks.append("other")
-            self.other_track.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
-        tmp_locs = [os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks]
-        overlay_tracks(tmp_locs, self.temp_dir.name)
-        split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
-        split_mix_content = QMediaContent(split_mix_url)
-        self.player.setMedia(split_mix_content)
+        if key == Qt.Key_Space:
+            self.toolbar.play_pause_song()
+        elif key == Qt.Key_Left:  # move song position back by 5s
+            self.player.movePositionByMs(-5000)
+        elif key == Qt.Key_Right:  # move song position forward by 5s
+            self.player.movePositionByMs(5000)
+        elif key == Qt.Key_Up:  # increase volume by 5
+            new_volume = 100 if (self.player.volume() + 5 > 100) else self.player.volume() + 5
+            self.player.setVolume(new_volume)
+            self.toolbar.volumeSlider.setValue(new_volume)
+        elif key == Qt.Key_Down:  # decrease volume by 5
+            new_volume = 0 if (self.player.volume() - 5 < 0) else self.player.volume() - 5
+            self.player.setVolume(new_volume)
+        elif key == Qt.Key_M:  # mute song
+            self.player.setVolume(0)
+            self.toolbar.volumeSlider.setValue(0)

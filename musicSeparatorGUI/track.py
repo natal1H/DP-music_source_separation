@@ -9,6 +9,7 @@ class Track(QWidget):
     def __init__(self, name, player):
         super().__init__()
 
+        self.name = name
         self.player = player
         self.player.positionChanged.connect(self.change_progress_bar_pos)
         self.player.durationChanged.connect(self.change_progress_bar_range)
@@ -29,10 +30,10 @@ class Track(QWidget):
         infoLayout = QVBoxLayout()
         infoLayout.setContentsMargins(0, 0, 0, 0)  # no margins
 
-        trackName = QLabel(name)
+        trackName = QLabel(self.name)
         trackName.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
 
-        if name != "Mixture":
+        if self.name != "Mixture":
             self.muteButton = QPushButton()
             self.muteButton.setFixedSize(QSize(20, 20))
             self.muteButton.setIcon(QIcon('img/not_mute_icon.png'))

@@ -34,7 +34,7 @@ class Toolbar(QWidget):
                                            "QPushButton::hover {background-color : #8C8C8C;}")
 
         # Jump to end button
-        self.jumpToEndButton = QPushButton()
+        self.jumpToEndButton = QPushButton(clicked=self.jump_to_end)
         self.jumpToEndButton.setFixedSize(QSize(30, 30))
         self.jumpToEndButton.setIcon(QIcon('img/to_end.png'))
         self.jumpToEndButton.setStyleSheet("QPushButton {background-color: #A5A5A5; border-radius: 4px;}"
@@ -90,13 +90,17 @@ class Toolbar(QWidget):
                 self.player.play()
                 self.playPauseButton.setIcon(QIcon('img/pause_icon.png'))
                 print("Playing")
+        self.sender().clearFocus()
 
     def change_volume(self):
         self.player.setVolume(self.volumeSlider.value())
 
-    #def split_song(self):
-    #    print("Splitting song")
-
     def jump_to_beginning(self):
-        print("Jumping to beginning of the song")
         self.player.setPosition(0)
+        self.sender().clearFocus()
+
+    def jump_to_end(self):
+        self.player.pause()
+        self.player.setPosition(self.player.duration())
+        self.playPauseButton.setIcon(QIcon('img/play_icon.png'))
+        self.sender().clearFocus()
