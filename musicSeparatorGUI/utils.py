@@ -1,13 +1,11 @@
 from PyQt5.QtGui import QPalette
-from PyQt5.QtWidgets import QFrame, QSizePolicy
-from PyQt5.QtCore import QSize
+from PyQt5.QtWidgets import QMessageBox
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import pydub
 from PIL import Image
 from pydub import AudioSegment
-from pydub.playback import play
 
 def read_mp3(filepath):
     """MP3 to numpy array"""
@@ -37,7 +35,6 @@ def save_waveform_plot(mp3_path, save_location, width_px=1200, height_px=90):
     new_image.save(save_location)
 
 
-
 def changeWidgetColor(widget, color):
     widget.setAutoFillBackground(True)
     palette = widget.palette()
@@ -62,15 +59,11 @@ def overlay_tracks(tracks_locations, save_location):
         mixed = mixed.overlay(audio)
     mixed.export(save_location + "/mixed.mp3", format='mp3')
 
-class QHSeparationLine(QFrame):
-    """
-    Horizontal separation line
-    """
-    def __init__(self):
-        super().__init__()
-        self.setFixedSize(QSize(1120, 20))
-        self.setFrameShape(QFrame.HLine)
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
-        self.setLineWidth(2)
-        self.setContentsMargins(15, 0, 15, 0)
 
+def showWarningDialog(title, message):
+    dialog = QMessageBox()
+    dialog.setModal(True)
+    dialog.setIcon(QMessageBox.Information)
+    dialog.setWindowTitle(title)
+    dialog.setText(message)
+    dialog.exec()
