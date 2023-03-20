@@ -58,12 +58,3 @@ def overlay_tracks(tracks_locations, save_location):
     for audio in audios[1:]:
         mixed = mixed.overlay(audio)
     mixed.export(save_location + "/mixed.mp3", format='mp3')
-
-
-def showWarningDialog(title, message):
-    dialog = QMessageBox()
-    dialog.setModal(True)
-    dialog.setIcon(QMessageBox.Information)
-    dialog.setWindowTitle(title)
-    dialog.setText(message)
-    dialog.exec()

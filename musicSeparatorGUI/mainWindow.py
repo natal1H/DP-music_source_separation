@@ -7,7 +7,8 @@ from toolbar import Toolbar
 from timeline import Timeline
 from track import Track
 from player import Player
-from utils import save_waveform_plot, overlay_tracks, showWarningDialog
+from utils import save_waveform_plot, overlay_tracks
+from dialogs import showWarningDialog, SplitInputDialog
 from separate import separate_track
 from worker import Worker
 import tempfile
@@ -66,6 +67,10 @@ class MainWindow(QMainWindow):
         self.other_track = Track("Other", self.player)
         self.other_track.hide()
 
+        self.instrument_track_dict = {"bass": self.bass_track, "drums": self.drums_track, "guitars": self.guitars_track,
+                                      "vocals": self.vocals_track, "other": self.other_track}
+
+
         # Add widgets to layout
         for widget in [self.toolbar, self.timeline, self.mixture_track, self.bass_track, self.drums_track, self.guitars_track, self.vocals_track, self.other_track]:
             layout.addWidget(widget)
@@ -100,45 +105,41 @@ class MainWindow(QMainWindow):
             self.toolbar.setEnabled(True)
 
     def split_song(self):
-        # Disable Split button - cannot split multiple times
-        self.toolbar.splitButton.setEnabled(False)
+        splitDialog = SplitInputDialog()
+        if splitDialog.exec():  # clicked ok
+            self.split_selection = splitDialog.getInputs()
+            print(self.split_selection)
+            # Disable Split button - cannot split multiple times
+            self.toolbar.splitButton.setEnabled(False)
 
-        # Pass the function to execute
-        #worker = Worker(separate_track, self.mixture_file_name, self.temp_dir.name)
-        worker = Worker(self.split_song_thread)
-        worker.signals.finished.connect(self.split_song_thread_complete)
-        self.threadpool.start(worker)  # Execute
+            # Pass the function to execute
+            worker = Worker(self.split_song_thread)
+            worker.signals.finished.connect(self.split_song_thread_complete)
+            self.threadpool.start(worker)  # Execute
 
-        showWarningDialog("Splitting song", "Please wait, the song is being separated into individual instruments. "
-                                            "Separated tracks will be automaticly displayed when process is finished.")
-
-        print("End split song")
+            showWarningDialog("Splitting song", "Please wait, the song is being separated into individual instruments. "
+                                                "Separated tracks will be automaticly displayed when process is finished.")
+            print("End split song")
+        else:
+            print("Clicked cancel.")
 
     def split_song_thread(self):
         separate_track(self.mixture_file_name, self.temp_dir.name)
-        for instrument, track_widget in [["bass", self.bass_track], ["drums", self.drums_track],
-                                         ["guitars", self.guitars_track], ["vocals", self.vocals_track],
-                                         ["other", self.other_track]]:
+        # for instrument, track_widget in [["bass", self.bass_track], ["drums", self.drums_track],
+        #                                  ["guitars", self.guitars_track], ["vocals", self.vocals_track],
+        #                                  ["other", self.other_track]]:
+        for instrument, track_widget in self.instrument_track_dict.items():
             save_waveform_plot(os.path.join(self.temp_dir.name, instrument + ".mp3"),
                                os.path.join(self.temp_dir.name, instrument + ".png"))
+
+    def combine_split_selection(self):
+        # TODO
+        pass
 
     def split_song_thread_complete(self):
         print("THREAD COMPLETE!")
         self.player.stop()
         self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
-
-        # worker = Worker(self.generate_track_plots)
-        # worker.signals.finished.connect(self.generate_track_plots_thread_complete)
-        # self.threadpool.start(worker)  # Execute
-
-    # def generate_track_plots(self):
-    #     print("Thread to generate track plots")
-    #     # Enable other tracks & create plots
-    #     for instrument, track_widget in [["bass", self.bass_track], ["drums", self.drums_track],
-    #                                      ["guitars", self.guitars_track], ["vocals", self.vocals_track],
-    #                                      ["other", self.other_track]]:
-    #         save_waveform_plot(os.path.join(self.temp_dir.name, instrument + ".mp3"),
-    #                            os.path.join(self.temp_dir.name, instrument + ".png"))
 
         # Disable Mixture track
         self.mixture_track.setEnabled(False)
@@ -161,29 +162,6 @@ class MainWindow(QMainWindow):
         split_mix_content = QMediaContent(split_mix_url)
 
         self.player.setMedia(split_mix_content)
-
-    # def generate_track_plots_thread_complete(self):
-    #     print("Generate tracks thread done.")
-    #     # Disable Mixture track
-    #     self.mixture_track.setEnabled(False)
-    #     self.mixture_track.hide()
-    #     # Enable other tracks & create plots
-    #     for instrument, track_widget in [["bass", self.bass_track], ["drums", self.drums_track],
-    #                                      ["guitars", self.guitars_track], ["vocals", self.vocals_track],
-    #                                      ["other", self.other_track]]:
-    #         track_widget.set_progress_bar_image(os.path.join(self.temp_dir.name, instrument + ".png"))
-    #         track_widget.muteButton.clicked.connect(self.toggle_track)
-    #         track_widget.show()
-    #
-    #     # overlay all tracks into one
-    #     self.active_tracks = ["bass", "drums", "guitars", "vocals", "other"]
-    #     overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks], self.temp_dir.name)
-    #
-    #     # load new media
-    #     split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
-    #     split_mix_content = QMediaContent(split_mix_url)
-    #
-    #     self.player.setMedia(split_mix_content)
 
     def toggle_track(self):
         track_widget = self.sender().parent().parent()
