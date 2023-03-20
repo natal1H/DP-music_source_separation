@@ -11,6 +11,7 @@ from utils import QHSeparationLine, save_waveform_plot, overlay_tracks
 from separate import separate_track
 import tempfile
 import os
+import shutil
 
 
 class MainWindow(QMainWindow):
@@ -31,6 +32,7 @@ class MainWindow(QMainWindow):
         file_menu = menu.addMenu("&File")
         file_menu.addAction(self.open_action)
         self.open_action.triggered.connect(self.choose_file)
+        self.export_action.triggered.connect(self.export_mixture)
         file_menu.addSeparator()
         file_menu.addAction(self.export_action)
 
@@ -165,3 +167,12 @@ class MainWindow(QMainWindow):
         elif key == Qt.Key_M:  # mute song
             self.player.setVolume(0)
             self.toolbar.volumeSlider.setValue(0)
+
+    def export_mixture(self):
+        if len(self.active_tracks) == 0:
+            print("Need to split first/select some tracks")
+        else:
+            print("Going to save currently selected mixture")
+            dialog = QFileDialog()
+            save_location = dialog.getSaveFileName(self, 'Save File')
+            shutil.copy(os.path.join(self.temp_dir.name, "mixed.mp3"), save_location[0])
