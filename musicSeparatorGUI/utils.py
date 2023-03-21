@@ -1,3 +1,5 @@
+import os.path
+
 from PyQt5.QtGui import QPalette
 from PyQt5.QtWidgets import QMessageBox
 import matplotlib.pyplot as plt
@@ -50,11 +52,11 @@ def formatTime(ms: int):
     return f"{minutes}:{seconds}"
 
 
-def overlay_tracks(tracks_locations, save_location):
+def overlay_tracks(tracks_locations, save_location, save_name="mixed.mp3"):
     audios = []
     for track_location in tracks_locations:
         audios.append(AudioSegment.from_file(track_location))
     mixed = audios[0]
     for audio in audios[1:]:
         mixed = mixed.overlay(audio)
-    mixed.export(save_location + "/mixed.mp3", format='mp3')
+    mixed.export(os.path.join(save_location, save_name), format='mp3')

@@ -70,7 +70,6 @@ class MainWindow(QMainWindow):
         self.instrument_track_dict = {"bass": self.bass_track, "drums": self.drums_track, "guitars": self.guitars_track,
                                       "vocals": self.vocals_track, "other": self.other_track}
 
-
         # Add widgets to layout
         for widget in [self.toolbar, self.timeline, self.mixture_track, self.bass_track, self.drums_track, self.guitars_track, self.vocals_track, self.other_track]:
             layout.addWidget(widget)
@@ -120,21 +119,19 @@ class MainWindow(QMainWindow):
             showWarningDialog("Splitting song", "Please wait, the song is being separated into individual instruments. "
                                                 "Separated tracks will be automaticly displayed when process is finished.")
             print("End split song")
-        else:
-            print("Clicked cancel.")
 
     def split_song_thread(self):
         separate_track(self.mixture_file_name, self.temp_dir.name)
-        # for instrument, track_widget in [["bass", self.bass_track], ["drums", self.drums_track],
-        #                                  ["guitars", self.guitars_track], ["vocals", self.vocals_track],
-        #                                  ["other", self.other_track]]:
-        for instrument, track_widget in self.instrument_track_dict.items():
-            save_waveform_plot(os.path.join(self.temp_dir.name, instrument + ".mp3"),
-                               os.path.join(self.temp_dir.name, instrument + ".png"))
-
-    def combine_split_selection(self):
-        # TODO
-        pass
+        instruments_to_be_joined = ["other"]
+        for instrument, checked in self.instrument_track_dict.items():
+            if checked:
+                save_waveform_plot(os.path.join(self.temp_dir.name, instrument + ".mp3"),
+                                   os.path.join(self.temp_dir.name, instrument + ".png"))
+            else:
+                instruments_to_be_joined.append(instrument)
+        if len(instruments_to_be_joined) == 1:  # all were checked, no need to overlay into other
+            overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in instruments_to_be_joined],
+                           self.temp_dir.name, "other.mp3")
 
     def split_song_thread_complete(self):
         print("THREAD COMPLETE!")
@@ -145,15 +142,16 @@ class MainWindow(QMainWindow):
         self.mixture_track.setEnabled(False)
         self.mixture_track.hide()
         # Enable other tracks & create plots
-        for instrument, track_widget in [["bass", self.bass_track], ["drums", self.drums_track],
-                                         ["guitars", self.guitars_track], ["vocals", self.vocals_track],
-                                         ["other", self.other_track]]:
-            track_widget.set_progress_bar_image(os.path.join(self.temp_dir.name, instrument + ".png"))
-            track_widget.muteButton.clicked.connect(self.toggle_track)
-            track_widget.show()
+        self.split_selection["other"] = True
+        self.active_tracks = []
+        for instrument, checked in self.split_selection.items():
+            if checked:
+                track_widget = self.instrument_track_dict[instrument]
+                track_widget.set_progress_bar_image(os.path.join(self.temp_dir.name, instrument + ".png"))
+                track_widget.muteButton.clicked.connect(self.toggle_track)
+                track_widget.show()
+                self.active_tracks.append(instrument)
 
-        # overlay all tracks into one
-        self.active_tracks = ["bass", "drums", "guitars", "vocals", "other"]
         overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks],
                        self.temp_dir.name)
 
