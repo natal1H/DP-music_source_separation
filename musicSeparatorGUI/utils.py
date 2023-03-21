@@ -1,11 +1,11 @@
 import os.path
 
 from PyQt5.QtGui import QPalette
-from PyQt5.QtWidgets import QMessageBox
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import pydub
+import json
 from PIL import Image
 from pydub import AudioSegment
 
@@ -60,3 +60,15 @@ def overlay_tracks(tracks_locations, save_location, save_name="mixed.mp3"):
     for audio in audios[1:]:
         mixed = mixed.overlay(audio)
     mixed.export(os.path.join(save_location, save_name), format='mp3')
+
+
+def load_json_file(json_location):
+    f = open(json_location)
+    data = json.load(f)
+    f.close()
+    return data
+
+
+def save_json_file(data, json_location):
+    with open(json_location, 'w') as fp:
+        json.dump(data, fp)

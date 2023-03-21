@@ -7,8 +7,8 @@ from toolbar import Toolbar
 from timeline import Timeline
 from track import Track
 from player import Player
-from utils import save_waveform_plot, overlay_tracks
-from dialogs import showWarningDialog, SplitInputDialog
+from utils import save_waveform_plot, overlay_tracks, save_json_file
+from dialogs import showWarningDialog, SplitInputDialog, SettingsDialog
 from separate import separate_track
 from worker import Worker
 import tempfile
@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
 
         # Menu
         self.open_action = QAction("&Open", self)
-        self.export_action = QAction("Export", self)
+        self.export_action = QAction("&Export", self)
         menu = self.menuBar()
         file_menu = menu.addMenu("&File")
         file_menu.addAction(self.open_action)
@@ -40,6 +40,9 @@ class MainWindow(QMainWindow):
         self.export_action.triggered.connect(self.export_mixture)
         file_menu.addSeparator()
         file_menu.addAction(self.export_action)
+        self.settings_action = QAction("&Settings", self)
+        menu.addAction(self.settings_action)
+        self.settings_action.triggered.connect(self.open_settings)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Left, top, right, bottom
@@ -207,3 +210,8 @@ class MainWindow(QMainWindow):
             dialog = QFileDialog()
             save_location = dialog.getSaveFileName(self, 'Save File')
             shutil.copy(os.path.join(self.temp_dir.name, "mixed.mp3"), save_location[0])
+
+    def open_settings(self):
+        settingsDialog = SettingsDialog()
+        if settingsDialog.exec():  # clicked ok
+            save_json_file(settingsDialog.getInputs(), "./conf/separation_config.json")
