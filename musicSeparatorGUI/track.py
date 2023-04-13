@@ -1,10 +1,9 @@
-from PyQt5.QtWidgets import QPushButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QProgressBar, QFrame
+from PyQt5.QtWidgets import QPushButton, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QColor, QIcon
 from utils import changeWidgetColor
-from player import Player
 from progressbar import ProgressBar
-
+from overlay import Overlay
 
 class Track(QWidget):
     def __init__(self, name, player):
@@ -46,6 +45,12 @@ class Track(QWidget):
         self.progress_bar.setFixedSize(QSize(1020, 90))
         self.progress_bar.setStyleSheet(f"QProgressBar {{border : 1px solid #5F5F5F;}}"
                                         "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
+        # Overlay
+        self.overlay = Overlay(self.progress_bar)
+        self.overlay.setGeometry(self.progress_bar.geometry())
+        #self.overlayOn = False
+        self.overlay.hide()
+
         # Add widgets to layouts
         infoLayout.addWidget(trackName)
         if name != "Mixture":

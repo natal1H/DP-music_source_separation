@@ -12,9 +12,13 @@ class SplitInputDialog(QDialog):
         self.setModal(True)
         self.setWindowTitle("Split selection")
         self.bass_checkbox = QCheckBox()
+        self.bass_checkbox.setChecked(True)
         self.drums_checkbox = QCheckBox()
+        self.drums_checkbox.setChecked(True)
         self.guitars_checkbox = QCheckBox()
+        self.guitars_checkbox.setChecked(True)
         self.vocals_checkbox = QCheckBox()
+        self.vocals_checkbox.setChecked(True)
         buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
 
         layout = QFormLayout(self)

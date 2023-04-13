@@ -171,12 +171,16 @@ class MainWindow(QMainWindow):
         prev_position = self.player.position()
         self.player.stop()
         self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
-        if instrument_name in self.active_tracks:
+
+        if instrument_name in self.active_tracks:  # Track will be now MUTED
             self.active_tracks.remove(instrument_name)
             track_widget.muteButton.setIcon(QIcon('img/mute_icon.png'))
+            track_widget.overlay.show()
         else:
-            self.active_tracks.append(instrument_name)
+            self.active_tracks.append(instrument_name)  # Track will be now UNMUTED
             track_widget.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
+            track_widget.overlay.hide()
+
         overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks], self.temp_dir.name)
         split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
         split_mix_content = QMediaContent(split_mix_url)
