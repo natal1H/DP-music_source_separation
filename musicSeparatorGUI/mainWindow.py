@@ -215,3 +215,8 @@ class MainWindow(QMainWindow):
         settingsDialog = SettingsDialog()
         if settingsDialog.exec():  # clicked ok
             save_json_file(settingsDialog.getInputs(), "./conf/separation_config.json")
+
+    def move_song_to_position(self, percentual_position):
+        print("Will move song to this % position:", percentual_position)
+        new_pos = int(percentual_position * self.player.duration())
+        self.player.setPosition(new_pos)

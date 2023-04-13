@@ -3,6 +3,7 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QColor, QIcon
 from utils import changeWidgetColor
 from player import Player
+from progressbar import ProgressBar
 
 
 class Track(QWidget):
@@ -40,12 +41,11 @@ class Track(QWidget):
             self.muteButton.setStyleSheet("background-color: #D9D9D9; border: none;")
 
         # Progress bar
-        self.progress_bar = QProgressBar()
+        self.progress_bar = ProgressBar()
         self.progress_bar.setFormat("")
         self.progress_bar.setFixedSize(QSize(1020, 90))
         self.progress_bar.setStyleSheet(f"QProgressBar {{border : 1px solid #5F5F5F;}}"
                                         "QProgressBar::chunk {background : rgba(0, 255, 0, 100);}")
-
         # Add widgets to layouts
         infoLayout.addWidget(trackName)
         if name != "Mixture":
