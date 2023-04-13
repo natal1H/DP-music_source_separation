@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import QMessageBox, QDialog, QCheckBox, QDialogButtonBox, Q
     QLineEdit, QFileDialog, QGridLayout, QVBoxLayout, QComboBox
 from PyQt5.QtCore import QCoreApplication, QMetaObject
 from utils import load_json_file
+import torch
+
 # https://stackoverflow.com/questions/56019273/how-can-i-get-more-input-text-in-pyqt5-inputdialog
 # https://stackoverflow.com/questions/41139892/pyqt5-retrieve-folder-directory-and-set-it-in-lineedit
 # TODO at least has to be checked to be able to click OK
@@ -74,11 +76,13 @@ class SettingsDialog(QDialog):
         # Choosing device - CPU or GPU
         self.deviceComboBox = QComboBox()
         self.deviceComboBox.addItem('cpu')
-        self.deviceComboBox.addItem('cuda')
-        if current_settings["device"] == "cpu":
-            self.deviceComboBox.setCurrentIndex(0)
-        else:
-            self.deviceComboBox.setCurrentIndex(1)
+
+        if torch.cuda.is_available():
+            self.deviceComboBox.addItem('cuda')
+            if current_settings["device"] == "cpu":
+                self.deviceComboBox.setCurrentIndex(0)
+            else:
+                self.deviceComboBox.setCurrentIndex(1)
 
         # Choosing model signature
         # TODO - update to newer model
