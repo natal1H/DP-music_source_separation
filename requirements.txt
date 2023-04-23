@@ -11,3 +11,4 @@ ffprobe
 stempeg
 museval
 lameenc
+dora-search

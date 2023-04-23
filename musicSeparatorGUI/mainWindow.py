@@ -29,7 +29,6 @@ class MainWindow(QMainWindow):
         self.active_tracks = []
 
         self.setWindowTitle("Music Separator")
-        #self.setMinimumSize(QSize(1120, 580))
         self.setMinimumSize(QSize(1120, 600))
 
         # Menu
@@ -53,6 +52,7 @@ class MainWindow(QMainWindow):
         # Player for playing songs
         self.player = player
         self.player.setVolume(50)
+        self.player.stateChanged.connect(self.player_state_changed)
 
         self.toolbar = Toolbar(self.player)
         self.toolbar.setEnabled(False)
@@ -101,7 +101,7 @@ class MainWindow(QMainWindow):
 
     def choose_file(self):
 
-        self.statusbar.change_text("Opening file")
+        self.statusbar.change_text("Opening file...")
 
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.ExistingFile)
@@ -115,7 +115,7 @@ class MainWindow(QMainWindow):
 
             self.setWindowTitle(Path(self.mixture_file_name).stem + " - Music Separator")
 
-            self.statusbar.change_text("Loading audio")
+            self.statusbar.change_text("Loading audio...")
 
             # load the audio file
             mixture_url = QUrl.fromLocalFile(self.mixture_file_name)
@@ -124,7 +124,7 @@ class MainWindow(QMainWindow):
             self.player.setMedia(mixture_content)
             # create the waveform plot of mixture
 
-            self.statusbar.change_text("Generating waveform graph")
+            self.statusbar.change_text("Generating waveform graph...")
 
             save_waveform_plot(self.mixture_file_name, os.path.join(self.temp_dir.name, "mixture.png"))
             self.mixture_track.set_progress_bar_image(os.path.join(self.temp_dir.name, "mixture.png"))
@@ -136,7 +136,7 @@ class MainWindow(QMainWindow):
             self.statusbar.change_text("")
 
     def split_song(self):
-        self.statusbar.change_text("Splitting audio")
+        self.statusbar.change_text("Splitting audio...")
 
         splitDialog = SplitInputDialog()
         if splitDialog.exec():  # clicked ok
@@ -155,10 +155,10 @@ class MainWindow(QMainWindow):
             print("End split song")
 
     def split_song_thread(self):
-        self.statusbar.change_text("Separating track into individual instruments")
+        self.statusbar.change_text("Separating track into individual instruments...")
         separate_track(self.mixture_file_name, self.temp_dir.name)
         instruments_to_be_joined = ["other"]
-        self.statusbar.change_text("Generating graphs for separated tracks")
+        self.statusbar.change_text("Generating graphs for separated tracks...")
         for instrument, checked in self.instrument_track_dict.items():
             if checked:
                 save_waveform_plot(os.path.join(self.temp_dir.name, instrument + ".mp3"),
@@ -171,7 +171,7 @@ class MainWindow(QMainWindow):
 
     def split_song_thread_complete(self):
         print("THREAD COMPLETE!")
-        self.statusbar.change_text("Separation complete")
+        self.statusbar.change_text("Separation complete...")
         self.player.stop()
         self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
 
@@ -200,32 +200,41 @@ class MainWindow(QMainWindow):
         self.statusbar.change_text("")
 
     def toggle_track(self):
-        if len(self.active_tracks) > 1:
-            track_widget = self.sender().parent().parent()
-            instrument_name = track_widget.name.lower()
+        track_widget = self.sender().parent().parent()
+        instrument_name = track_widget.name.lower()
 
-            prev_position = self.player.position()
-            self.player.stop()
-            self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
+        if instrument_name in self.active_tracks and len(self.active_tracks) < 2:
+            return
 
-            if instrument_name in self.active_tracks:  # Track will be now MUTED
+        self.statusbar.change_text("Muting track...")
+        self.player.blockSignals(True)
+
+        prev_position = self.player.position()
+        self.player.stop()
+        self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
+
+        if instrument_name in self.active_tracks:  # Track will be now MUTED
+            if len(self.active_tracks) > 1:
                 self.active_tracks.remove(instrument_name)
                 track_widget.muteButton.setIcon(QIcon('img/mute_icon.png'))
                 track_widget.overlay.show()
-            else:
-                self.active_tracks.append(instrument_name)  # Track will be now UNMUTED
-                track_widget.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
-                track_widget.overlay.hide()
+        else:
+            self.active_tracks.append(instrument_name)  # Track will be now UNMUTED
+            track_widget.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
+            track_widget.overlay.hide()
 
-            active_track_paths = [os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks]
-            overlay_tracks(active_track_paths, self.temp_dir.name)
+        active_track_paths = [os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks]
+        overlay_tracks(active_track_paths, self.temp_dir.name)
 
-            split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
-            split_mix_content = QMediaContent(split_mix_url)
-            self.player.setMedia(split_mix_content)
-            self.player.setPosition(prev_position)
+        split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
+        split_mix_content = QMediaContent(split_mix_url)
+        self.player.setMedia(split_mix_content)
+        self.player.setPosition(prev_position)
 
-    def keyPressEvent(self, event):
+        self.statusbar.change_text("")
+        self.player.blockSignals(False)
+
+    def keyReleaseEvent(self, event):
         key = event.key()
 
         if key == Qt.Key_Space:
@@ -262,3 +271,13 @@ class MainWindow(QMainWindow):
         print("Will move song to this % position:", percentual_position)
         new_pos = int(percentual_position * self.player.duration())
         self.player.setPosition(new_pos)
+
+    def player_state_changed(self):
+        print("Player stated changed, now is:", self.player.state())
+        if self.player.state() == 0:  # Stopped
+            self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
+            self.statusbar.change_text("Stopped...")
+        elif self.player.state() == 1:
+            self.statusbar.change_text("")
+        elif self.player.state() == 2:
+            self.statusbar.change_text("Paused...")
