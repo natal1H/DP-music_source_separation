@@ -31,7 +31,6 @@ def get_model(args):
         'samplerate': args.dset.samplerate,
         'segment': args.model_segment or 5 * args.dset.segment,  # TODO: 5 instead of 4 because of 'guitars' ok?
     }
-    # klass = {'demucs': Demucs, 'hdemucs': HDemucs}[args.model]
     klass = {'demucs': Demucs}[args.model]
     kw = OmegaConf.to_container(getattr(args, args.model), resolve=True)
     model = klass(**extra, **kw)

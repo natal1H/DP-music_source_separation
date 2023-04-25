@@ -36,7 +36,7 @@ def new_sdr(references, estimates):
     assert estimates.dim() == 4
     delta = 1e-7  # avoid numerical errors
     num = th.sum(th.square(references), dim=(2, 3))
-    den = th.sum(th.square(references - estimates), dim=(2, 3))
+    den = th.sum(th.square(references - estimates), dim=(2, 3)) # Tu to padne
     num += delta
     den += delta
     scores = 10 * th.log10(num / den)
@@ -47,7 +47,7 @@ def eval_track(references, estimates, win, hop, compute_sdr=True):
     references = references.transpose(1, 2).double()
     estimates = estimates.transpose(1, 2).double()
 
-    new_scores = new_sdr(references.cpu()[None], estimates.cpu()[None])[0]
+    new_scores = new_sdr(references.cpu()[None], estimates.cpu()[None])[0]  # Tu to padne
 
     if not compute_sdr:
         return None, new_scores
@@ -63,18 +63,18 @@ def eval_track(references, estimates, win, hop, compute_sdr=True):
             bsseval_sources_version=False)[:-1]
         return scores, new_scores
 
-def evaluate(solver, compute_sdr=False):
+    return scores, new_scores
+
+def evaluate(solver, compute_sdr=False, test_location="../datasets/remix_dataset/test"):
     args = solver.args
 
     output_dir = solver.folder / "results"
     output_dir.mkdir(exist_ok=True, parents=True)
-    json_folder = solver.folder / "results/test"
-    json_folder.mkdir(exist_ok=True, parents=True)
-    test_dir = Path(args.dset.remixdset) / "test"
-
+    test_dir = Path(test_location)
+    segment_len = 30  # seconds
     src_rate = args.dset.samplerate
 
-    eval_device = 'cpu'  # really on cpu?
+    eval_device = 'cpu'
     pendings = []
     model = solver.model
     win = int(1. * src_rate)
@@ -107,7 +107,6 @@ def evaluate(solver, compute_sdr=False):
                                 overlap=args.test.overlap)[0]
         estimates = estimates * ref.std() + ref.mean()
         estimates = estimates.to(eval_device)
-        print("ESTIMATES SHAPE: ", estimates.shape)
 
         references = th.stack(
             [track for track in [drums, bass, other, vocals, guitars]])
@@ -116,24 +115,16 @@ def evaluate(solver, compute_sdr=False):
         references = references.to(eval_device)
         references = convert_audio(references, src_rate,
                                    model.samplerate, model.audio_channels)
-        print("REFERENCES SHAPE: ", references.shape)
-        if args.test.save:
-            folder = solver.folder / "wav" / name
-            folder.mkdir(exist_ok=True, parents=True)
-            for name, estimate in zip(model.sources, estimates):
-                save_audio(estimate.cpu(), folder / (name + ".mp3"), model.samplerate)
+        total_length = references.shape[2]
+        num_segments = int(total_length / src_rate / segment_len) + 1
 
-        scores, new_scores = eval_track(references, estimates, win, hop, compute_sdr)
-        if scores is not None:
-            (sdr, isr, sir, sar) = scores
-            for idx, target in enumerate(model.sources):
-                values = {
-                    "SDR": sdr[idx].tolist(),
-                    "SIR": sir[idx].tolist(),
-                    "ISR": isr[idx].tolist(),
-                    "SAR": sar[idx].tolist()
-                }
-        pendings.append((name, scores, new_scores))
+        for segment_index in range(num_segments):
+            start = segment_index * segment_len * src_rate
+            end = start + segment_len * src_rate
+            segment_references = references[:, :, start:end]
+            segment_estimates = estimates[:, :, start:end]
+            segment_scores, segment_new_scores = eval_track(segment_references, segment_estimates, win, hop, compute_sdr)
+            pendings.append((name + "-segment" + str(segment_index), segment_scores, segment_new_scores))
 
     tracks = {}
     for track_name, scores, nsdrs in pendings:

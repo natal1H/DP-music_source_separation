@@ -1,0 +1,17 @@
+julius
+numpy==1.23.2
+torch==1.11.0
+torchaudio==0.11.0
+tqdm
+hydra-colorlog==1.1.0
+hydra-core==1.1.0
+diffq>=0.2.1
+ffmpeg
+ffprobe
+stempeg
+museval
+lameenc
+dora-search
+matplotlib
+PyQt5
+pydub

@@ -19,8 +19,7 @@ import random
 from torch.nn import functional as F
 
 
-#Model = tp.Union[Demucs, HDemucs]
-Model = tp.Union[Demucs]  # TODO for now only original Demucs will be used
+Model = tp.Union[Demucs]
 
 
 class BagOfModels(nn.Module):
