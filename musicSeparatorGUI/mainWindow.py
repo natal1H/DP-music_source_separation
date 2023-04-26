@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
         self.active_tracks = []
 
         self.setWindowTitle("Music Separator")
-        self.setMinimumSize(QSize(1120, 600))
+        self.setFixedSize(QSize(1120, 600))
 
         # Menu
         self.open_action = QAction("&Open", self)
@@ -74,7 +74,8 @@ class MainWindow(QMainWindow):
 
         self.instrument_track_dict = {"bass": self.bass_track, "drums": self.drums_track, "guitars": self.guitars_track,
                                       "vocals": self.vocals_track, "other": self.other_track}
-
+        for track_widget in self.instrument_track_dict.values():
+            track_widget.muteButton.clicked.connect(self.toggle_track)
         self.statusbar = StatusBar()
 
         # Add widgets to layout
@@ -129,6 +130,7 @@ class MainWindow(QMainWindow):
             save_waveform_plot(self.mixture_file_name, os.path.join(self.temp_dir.name, "mixture.png"))
             self.mixture_track.set_progress_bar_image(os.path.join(self.temp_dir.name, "mixture.png"))
 
+            self.mixture_track.setEnabled(True)
             self.mixture_track.show()
 
             # Enable toolbar now
@@ -181,14 +183,23 @@ class MainWindow(QMainWindow):
         # Enable other tracks & create plots
         self.split_selection["other"] = True
         self.active_tracks = []
+
+        overlay_into_other_track = ["other"]
+        for instrument, checked in self.split_selection.items():
+            if not checked:
+                overlay_into_other_track.append(instrument)
+        overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in overlay_into_other_track],
+                       self.temp_dir.name, save_name="other.mp3")
+
         for instrument, checked in self.split_selection.items():
             if checked:
                 track_widget = self.instrument_track_dict[instrument]
                 track_widget.set_progress_bar_image(os.path.join(self.temp_dir.name, instrument + ".png"))
-                track_widget.muteButton.clicked.connect(self.toggle_track)
                 track_widget.show()
+                track_widget.overlay.hide()
+                track_widget.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
                 self.active_tracks.append(instrument)
-
+        print("Activate tracks after split:", self.active_tracks)
         overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks],
                        self.temp_dir.name)
 
@@ -203,6 +214,9 @@ class MainWindow(QMainWindow):
         track_widget = self.sender().parent().parent()
         instrument_name = track_widget.name.lower()
 
+        print("Toggle track clicked", instrument_name)
+        print(self.active_tracks)
+
         if instrument_name in self.active_tracks and len(self.active_tracks) < 2:
             return
 
@@ -214,11 +228,13 @@ class MainWindow(QMainWindow):
         self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
 
         if instrument_name in self.active_tracks:  # Track will be now MUTED
+            print("MUTING")
             if len(self.active_tracks) > 1:
                 self.active_tracks.remove(instrument_name)
                 track_widget.muteButton.setIcon(QIcon('img/mute_icon.png'))
                 track_widget.overlay.show()
         else:
+            print("UNMUTING")
             self.active_tracks.append(instrument_name)  # Track will be now UNMUTED
             track_widget.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
             track_widget.overlay.hide()
@@ -260,7 +276,8 @@ class MainWindow(QMainWindow):
         else:
             dialog = QFileDialog()
             save_location = dialog.getSaveFileName(self, 'Save File')
-            shutil.copy(os.path.join(self.temp_dir.name, "mixed.mp3"), save_location[0])
+            if save_location != "":
+                shutil.copy(os.path.join(self.temp_dir.name, "mixed.mp3"), save_location[0])
 
     def open_settings(self):
         settingsDialog = SettingsDialog()

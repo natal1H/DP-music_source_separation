@@ -40,6 +40,9 @@ class SplitInputDialog(QDialog):
 
 
 class SettingsDialog(QDialog):
+    xps_name_dict = {"cb34460b": "Remix + Medley (24/6)", "ce091eda": "Remix + Medley (28/6)","b5523bd4": "Remix (12/3)"}
+    name_xps_dict = {"Remix + Medley (24/6)": "cb34460b", "Remix + Medley (28/6)": "ce091eda", "Remix (12/3)": "b5523bd4"}
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUI()
@@ -60,6 +63,9 @@ class SettingsDialog(QDialog):
 
     def setupUI(self):
         current_settings = load_json_file("./conf/separation_config.json")
+
+        self.setWindowTitle("Separation settings")
+        self.setMinimumSize(400, 180)
 
         # Choosing folder where models are located
         ModelsFolderDialog = QDialog()
@@ -86,7 +92,12 @@ class SettingsDialog(QDialog):
 
         # Choosing model signature
         # TODO - update to newer model
-        self.modelNameLineEdit = QLineEdit(current_settings["name"])
+        #self.modelNameLineEdit = QLineEdit(current_settings["name"])
+        self.modelNameLineEdit = QComboBox()
+        for key, val in self.xps_name_dict.items():
+            self.modelNameLineEdit.addItem(val)
+
+        self.modelNameLineEdit.setCurrentText(self.xps_name_dict[current_settings["name"]])
 
         grid_layout = QGridLayout()
         grid_layout.addWidget(QLabel("Device:"), 0, 0)
@@ -110,7 +121,8 @@ class SettingsDialog(QDialog):
 
     def getInputs(self):
         return {"device": self.deviceComboBox.currentText(), "repo": self.folderLineEdit.text(),
-                "name": self.modelNameLineEdit.text(), "mp3": True}
+                "name": self.name_xps_dict[self.modelNameLineEdit.currentText()], "mp3": True}
+                # "name": self.modelNameLineEdit.text(), "mp3": True}
 
 def showWarningDialog(title, message):
     dialog = QMessageBox()
