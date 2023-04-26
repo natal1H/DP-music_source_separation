@@ -48,7 +48,6 @@ class Track(QWidget):
         # Overlay
         self.overlay = Overlay(self.progress_bar)
         self.overlay.setGeometry(self.progress_bar.geometry())
-        #self.overlayOn = False
         self.overlay.hide()
 
         # Add widgets to layouts

@@ -17,6 +17,8 @@ from demucs.audio import AudioFile, convert_audio, save_audio
 from demucs.pretrained import get_model_from_args, add_model_flags, ModelLoadingError
 from demucs.apply import apply_model
 
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 def load_track(track, audio_channels, samplerate):
     errors = {}
@@ -41,10 +43,10 @@ def load_track(track, audio_channels, samplerate):
             wav = convert_audio(wav, sr, samplerate, audio_channels)
 
     if wav is None:
-        print(f"Could not load file {track}. "
+        eprint(f"Could not load file {track}. "
               "Maybe it is not a supported file format? ")
         for backend, error in errors.items():
-            print(f"When trying to load using {backend}, got the following error: {error}")
+            eprint(f"When trying to load using {backend}, got the following error: {error}")
         sys.exit(1)
     return wav
 
@@ -122,27 +124,30 @@ def separate_track(track_location, save_folder):
     args.__dict__["repo"] = Path(user_settings_dict["repo"])
     args.__dict__["name"] = user_settings_dict["name"]
     args.__dict__["device"] = user_settings_dict["device"]
-    print(args)
 
     try:
         model = get_model_from_args(args)
     except ModelLoadingError as error:
-        fatal(error.args[0])
+        eprint(error.args[0])
+        return -1
 
     model.cpu()
     model.eval()
 
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
-    print(f"Separated tracks will be stored in {out.resolve()}")
 
     wav = load_track(track, model.audio_channels, model.samplerate)
 
     ref = wav.mean(0)
     wav = (wav - ref.mean()) / ref.std()
-    sources = apply_model(model, wav[None], device=args.device, shifts=args.shifts,
-                          split=args.split, overlap=args.overlap, progress=True,
-                          num_workers=args.jobs)[0]
+    try:
+        sources = apply_model(model, wav[None], device=args.device, shifts=args.shifts,
+                              split=args.split, overlap=args.overlap, progress=True,
+                              num_workers=args.jobs)[0]
+    except:
+        eprint("Error separating tracks.")
+        return -1
     sources = sources * ref.std() + ref.mean()
 
     ext = "mp3"
@@ -161,3 +166,5 @@ def separate_track(track_location, save_folder):
                                           stem=name, ext=ext)
         stem.parent.mkdir(parents=True, exist_ok=True)
         save_audio(source, str(stem), **kwargs)
+
+    return 0

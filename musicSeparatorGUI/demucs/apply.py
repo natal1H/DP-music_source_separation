@@ -201,8 +201,8 @@ def apply_model(model, mix, shifts=1, split=True,
             future = pool.submit(apply_model, model, chunk, **kwargs)
             futures.append((future, offset))
             offset += segment
-        if progress:
-            futures = tqdm.tqdm(futures, unit_scale=scale, ncols=120, unit='seconds')
+        #if progress:
+        #    futures = tqdm.tqdm(futures, unit_scale=scale, ncols=120, unit='seconds')
         for future, offset in futures:
             chunk_out = future.result()
             chunk_length = chunk_out.shape[-1]

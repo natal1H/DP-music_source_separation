@@ -12,10 +12,8 @@ class Application(QApplication):
         QApplication.__init__(self, args)
         self.temp_dir = tempfile.TemporaryDirectory()
         self.player = Player()
-        print(self.temp_dir.name)  # todo remove
 
     def clean_up(self):
-        print('closing')
         self.temp_dir.cleanup()
         self.player.stop()
 

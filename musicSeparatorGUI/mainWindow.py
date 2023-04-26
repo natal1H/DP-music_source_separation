@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.threadpool = QThreadPool()
-        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+        self.split_ok = True
 
         self.temp_dir = temp_dir
         self.mixture_file_name = None
@@ -143,7 +143,6 @@ class MainWindow(QMainWindow):
         splitDialog = SplitInputDialog()
         if splitDialog.exec():  # clicked ok
             self.split_selection = splitDialog.getInputs()
-            print(self.split_selection)
             # Disable Split button - cannot split multiple times
             self.toolbar.splitButton.setEnabled(False)
 
@@ -154,68 +153,73 @@ class MainWindow(QMainWindow):
 
             showWarningDialog("Splitting song", "Please wait, the song is being separated into individual instruments. "
                                                 "Separated tracks will be automaticly displayed when process is finished.")
-            print("End split song")
 
     def split_song_thread(self):
         self.statusbar.change_text("Separating track into individual instruments...")
-        separate_track(self.mixture_file_name, self.temp_dir.name)
-        instruments_to_be_joined = ["other"]
-        self.statusbar.change_text("Generating graphs for separated tracks...")
-        for instrument, checked in self.instrument_track_dict.items():
-            if checked:
-                save_waveform_plot(os.path.join(self.temp_dir.name, instrument + ".mp3"),
-                                   os.path.join(self.temp_dir.name, instrument + ".png"))
-            else:
-                instruments_to_be_joined.append(instrument)
-        if len(instruments_to_be_joined) == 1:  # all were checked, no need to overlay into other
-            overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in instruments_to_be_joined],
-                           self.temp_dir.name, "other.mp3")
+        res = separate_track(self.mixture_file_name, self.temp_dir.name)
+        if res != 0:
+            self.split_ok = False
+        else:
+            self.split_ok = True
+            instruments_to_be_joined = ["other"]
+            self.statusbar.change_text("Generating graphs for separated tracks...")
+            for instrument, checked in self.instrument_track_dict.items():
+                if checked:
+                    save_waveform_plot(os.path.join(self.temp_dir.name, instrument + ".mp3"),
+                                       os.path.join(self.temp_dir.name, instrument + ".png"))
+                else:
+                    instruments_to_be_joined.append(instrument)
+            if len(instruments_to_be_joined) == 1:  # all were checked, no need to overlay into other
+                overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in instruments_to_be_joined],
+                               self.temp_dir.name, "other.mp3")
 
     def split_song_thread_complete(self):
-        print("THREAD COMPLETE!")
         self.statusbar.change_text("Separation complete...")
-        self.player.stop()
-        self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
 
-        # Disable Mixture track
-        self.mixture_track.setEnabled(False)
-        self.mixture_track.hide()
-        # Enable other tracks & create plots
-        self.split_selection["other"] = True
-        self.active_tracks = []
+        if self.split_ok:
+            self.player.stop()
+            self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
 
-        overlay_into_other_track = ["other"]
-        for instrument, checked in self.split_selection.items():
-            if not checked:
-                overlay_into_other_track.append(instrument)
-        overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in overlay_into_other_track],
-                       self.temp_dir.name, save_name="other.mp3")
+            # Disable Mixture track
+            self.mixture_track.setEnabled(False)
+            self.mixture_track.hide()
+            # Enable other tracks & create plots
+            self.split_selection["other"] = True
+            self.active_tracks = []
 
-        for instrument, checked in self.split_selection.items():
-            if checked:
-                track_widget = self.instrument_track_dict[instrument]
-                track_widget.set_progress_bar_image(os.path.join(self.temp_dir.name, instrument + ".png"))
-                track_widget.show()
-                track_widget.overlay.hide()
-                track_widget.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
-                self.active_tracks.append(instrument)
-        print("Activate tracks after split:", self.active_tracks)
-        overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks],
-                       self.temp_dir.name)
+            overlay_into_other_track = ["other"]
+            for instrument, checked in self.split_selection.items():
+                if not checked:
+                    overlay_into_other_track.append(instrument)
+            overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in overlay_into_other_track],
+                           self.temp_dir.name, save_name="other.mp3")
 
-        # load new media
-        split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
-        split_mix_content = QMediaContent(split_mix_url)
+            for instrument, checked in self.split_selection.items():
+                if checked:
+                    track_widget = self.instrument_track_dict[instrument]
+                    track_widget.set_progress_bar_image(os.path.join(self.temp_dir.name, instrument + ".png"))
+                    track_widget.show()
+                    track_widget.overlay.hide()
+                    track_widget.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
+                    self.active_tracks.append(instrument)
+            overlay_tracks([os.path.join(self.temp_dir.name, name + ".mp3") for name in self.active_tracks],
+                           self.temp_dir.name)
 
-        self.player.setMedia(split_mix_content)
-        self.statusbar.change_text("")
+            # load new media
+            split_mix_url = QUrl.fromLocalFile(os.path.join(self.temp_dir.name, "mixed.mp3"))
+            split_mix_content = QMediaContent(split_mix_url)
+
+            self.player.setMedia(split_mix_content)
+            self.statusbar.change_text("")
+        else:
+            self.toolbar.splitButton.setEnabled(True)
+            showWarningDialog("Error splitting", "Error! Could not separate song. "
+                                                "Check model directory and name, or try CPU only separation.")
+
 
     def toggle_track(self):
         track_widget = self.sender().parent().parent()
         instrument_name = track_widget.name.lower()
-
-        print("Toggle track clicked", instrument_name)
-        print(self.active_tracks)
 
         if instrument_name in self.active_tracks and len(self.active_tracks) < 2:
             return
@@ -228,13 +232,11 @@ class MainWindow(QMainWindow):
         self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
 
         if instrument_name in self.active_tracks:  # Track will be now MUTED
-            print("MUTING")
             if len(self.active_tracks) > 1:
                 self.active_tracks.remove(instrument_name)
                 track_widget.muteButton.setIcon(QIcon('img/mute_icon.png'))
                 track_widget.overlay.show()
         else:
-            print("UNMUTING")
             self.active_tracks.append(instrument_name)  # Track will be now UNMUTED
             track_widget.muteButton.setIcon(QIcon('img/not_mute_icon.png'))
             track_widget.overlay.hide()
@@ -285,12 +287,10 @@ class MainWindow(QMainWindow):
             save_json_file(settingsDialog.getInputs(), "./conf/separation_config.json")
 
     def move_song_to_position(self, percentual_position):
-        print("Will move song to this % position:", percentual_position)
         new_pos = int(percentual_position * self.player.duration())
         self.player.setPosition(new_pos)
 
     def player_state_changed(self):
-        print("Player stated changed, now is:", self.player.state())
         if self.player.state() == 0:  # Stopped
             self.toolbar.playPauseButton.setIcon(QIcon('img/play_icon.png'))
             self.statusbar.change_text("Stopped...")

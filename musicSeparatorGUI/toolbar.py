@@ -41,7 +41,6 @@ class Toolbar(QWidget):
                                            "QPushButton::hover {background-color : #8C8C8C;}")
 
         # Split button
-        #self.splitButton = QPushButton("SPLIT", clicked=self.split_song)
         self.splitButton = QPushButton("SPLIT")
         self.splitButton.setFixedSize(QSize(60, 30))
         self.splitButton.setStyleSheet("color: #414141; background-color: #A5A5A5; border-radius: 4px;")
@@ -90,22 +89,18 @@ class Toolbar(QWidget):
                 self.playPauseButton.setIcon(QIcon('img/pause_icon.png'))
             else:  # was stopped
                 if self.player.position() == self.player.duration():
-                    print("back to start")
                     self.player.setPosition(0)
                 self.player.play()
                 self.playPauseButton.setIcon(QIcon('img/pause_icon.png'))
 
-        #self.sender().clearFocus()
 
     def change_volume(self):
         self.player.setVolume(self.volumeSlider.value())
 
     def jump_to_beginning(self):
         self.player.setPosition(0)
-        #self.sender().clearFocus()
 
     def jump_to_end(self):
         self.player.stop()
         self.player.setPosition(self.player.duration())
         self.playPauseButton.setIcon(QIcon('img/play_icon.png'))
-        #self.sender().clearFocus()
