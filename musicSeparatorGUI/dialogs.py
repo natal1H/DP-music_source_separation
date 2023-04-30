@@ -6,7 +6,6 @@ import torch
 
 # https://stackoverflow.com/questions/56019273/how-can-i-get-more-input-text-in-pyqt5-inputdialog
 # https://stackoverflow.com/questions/41139892/pyqt5-retrieve-folder-directory-and-set-it-in-lineedit
-# TODO at least has to be checked to be able to click OK
 
 class SplitInputDialog(QDialog):
     def __init__(self, parent=None):
@@ -40,8 +39,10 @@ class SplitInputDialog(QDialog):
 
 
 class SettingsDialog(QDialog):
-    xps_name_dict = {"cb34460b": "Remix + Medley (24/6)", "ce091eda": "Remix + Medley (28/6)", "b5523bd4": "Remix (12/3)"}
-    name_xps_dict = {"Remix + Medley (24/6)": "cb34460b", "Remix + Medley (28/6)": "ce091eda", "Remix (12/3)": "b5523bd4"}
+    xps_name_dict = {"195c4583": "Remix + Medley (24/6)", "442d1ed0": "Remix + Medley (28/6)",
+                     "0b6894ef": "Remix (12/3)", "9af80a6a": "Medley (12/3)"}
+    name_xps_dict = {"Remix + Medley (24/6)": "195c4583", "Remix + Medley (28/6)": "442d1ed0",
+                     "Remix (12/3)": "0b6894ef", "Medley (12/3)": "9af80a6a"}
 
     def __init__(self, parent=None):
         super().__init__(parent)
