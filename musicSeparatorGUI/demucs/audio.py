@@ -73,7 +73,6 @@ class AudioFile:
              samplerate=None,
              channels=None,
              temp_folder=None):
-        # TODO: test if works
         streams = np.array(range(len(self)))[streams]
         single = not isinstance(streams, np.ndarray)
         if single:

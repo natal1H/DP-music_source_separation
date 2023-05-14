@@ -2,5 +2,7 @@ venv
 datasets
 .idea
 demucs/outputs
+demucs/separated
+metadata
 *.mp3
 *.wav

@@ -1,8 +1,15 @@
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QColor
-from PyQt5.QtCore import Qt, QObject, QEvent
+from PyQt5.QtCore import Qt
 
-# todo: ref: https://stackoverflow.com/questions/49920532/how-to-draw-shape-over-a-widget-in-qt
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           overlay.py
+    Description:    Overlay on muted tracks
+"""
+
 
 class Overlay(QWidget):
     def __init__(self, parent=None):

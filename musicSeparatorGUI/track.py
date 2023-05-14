@@ -5,7 +5,19 @@ from utils import changeWidgetColor
 from progressbar import ProgressBar
 from overlay import Overlay
 
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           track.py
+    Description:    Track widget
+"""
+
 class Track(QWidget):
+    """
+    Track widget contains track name. In case of non-mixture track is has mute button.
+    It displays visualization of the audio.
+    """
     def __init__(self, name, player):
         super().__init__()
 
@@ -34,6 +46,7 @@ class Track(QWidget):
         trackName.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
 
         if self.name != "Mixture":
+            # Mute button
             self.muteButton = QPushButton()
             self.muteButton.setFixedSize(QSize(20, 20))
             self.muteButton.setIcon(QIcon('img/not_mute_icon.png'))

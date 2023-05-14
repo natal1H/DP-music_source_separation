@@ -17,6 +17,15 @@ import os
 import shutil
 from pathlib import Path
 
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           mainWindow.py
+    Description:    Main Application Window
+"""
+
+
 class MainWindow(QMainWindow):
     def __init__(self, temp_dir: tempfile.TemporaryFile, player: Player):
         super().__init__()
@@ -91,6 +100,10 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def reset_window_on_open(self):
+        """
+        On reset hides all tracks, split button is enabled again
+        """
+
         self.mixture_track.hide()
         self.bass_track.hide()
         self.drums_track.hide()
@@ -152,7 +165,7 @@ class MainWindow(QMainWindow):
             self.threadpool.start(worker)  # Execute
 
             showWarningDialog("Splitting song", "Please wait, the song is being separated into individual instruments. "
-                                                "Separated tracks will be automaticly displayed when process is finished.")
+                                                "Separated tracks will be automatically displayed when process is finished.")
 
     def split_song_thread(self):
         self.statusbar.change_text("Separating track into individual instruments...")
@@ -218,6 +231,10 @@ class MainWindow(QMainWindow):
 
 
     def toggle_track(self):
+        """
+        Toggles track to be muted or unmuted
+        """
+
         track_widget = self.sender().parent().parent()
         instrument_name = track_widget.name.lower()
 

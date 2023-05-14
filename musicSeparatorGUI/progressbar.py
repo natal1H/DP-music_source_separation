@@ -1,4 +1,12 @@
 from PyQt5.QtWidgets import QProgressBar
+
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           progressbar.py
+    Description:    Modified progress bar
+"""
 class ProgressBar(QProgressBar):
 
     def mousePressEvent(self, event):

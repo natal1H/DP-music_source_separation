@@ -4,6 +4,14 @@ from PyQt5.QtGui import QColor
 from utils import changeWidgetColor, formatTime
 from player import Player
 
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           timeline.py
+    Description:    Timeline with current playing time and total time
+"""
+
 class Timeline(QWidget):
     def __init__(self, player: Player):
         super().__init__()

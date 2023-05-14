@@ -29,7 +29,6 @@ def get_model(name: str,
     """`name` must be a bag of models name or a pretrained signature
     from the remote AWS model repo or the specified local repo if `repo` is not None.
     """
-    # TODO note if correctly removed remote repo option
 
     model_repo: ModelOnlyRepo
 

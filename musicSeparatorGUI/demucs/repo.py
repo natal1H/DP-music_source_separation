@@ -7,7 +7,6 @@
 A repo can either be the main remote repository stored in AWS, or a local repository
 with your own models.
 """
-# TODO for thesis only local repository will be used
 
 from hashlib import sha256
 from pathlib import Path

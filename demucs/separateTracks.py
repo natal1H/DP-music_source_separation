@@ -49,8 +49,6 @@ def load_track(track, audio_channels, samplerate):
 
 
 def main():
-    print("MAIN")
-
     parser = argparse.ArgumentParser("demucs.separate",
                                      description="Separate the sources for the given tracks")
     parser.add_argument("tracks", nargs='+', type=Path, default=[], help='Path to tracks')

@@ -4,6 +4,14 @@ from player import Player
 import tempfile
 import sys
 
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           main.py
+    Description:    Starting point for the GUI application 
+"""
+
 
 # The main application
 class Application(QApplication):

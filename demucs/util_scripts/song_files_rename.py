@@ -1,7 +1,7 @@
 # -----------------------------------------------------------
 # script to rename downloaded songs into format {artist}-{song_name}
 #
-# 2022 Natália Holková
+# 2023 Natália Holková
 # xholko02@stud.fit.vutbr.cz
 # -----------------------------------------------------------
 

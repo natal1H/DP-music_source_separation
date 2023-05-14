@@ -1,6 +1,14 @@
 from PyQt5.QtCore import QRunnable, pyqtSlot, pyqtSignal, QObject
-import traceback, sys
+import traceback
+import sys
 
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           worker.py
+    Description:    Multithreading worker
+"""
 
 class WorkerSignals(QObject):
     """
@@ -36,7 +44,7 @@ class Worker(QRunnable):
 
     def __init__(self, fn, *args, **kwargs):
         super(Worker, self).__init__()
-        # Store constructor arguments (re-used for processing)
+        # Store constructor arguments
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
@@ -54,8 +62,8 @@ class Worker(QRunnable):
             )
         except:
             traceback.print_exc()
-            exctype, value = sys.exc_info()[:2]
-            self.signals.error.emit((exctype, value, traceback.format_exc()))
+            type, value = sys.exc_info()[:2]
+            self.signals.error.emit((type, value, traceback.format_exc()))
         else:
             self.signals.result.emit(result)  # Return the result of the processing
         finally:

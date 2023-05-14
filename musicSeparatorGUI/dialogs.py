@@ -4,10 +4,20 @@ from PyQt5.QtCore import QCoreApplication, QMetaObject
 from utils import load_json_file
 import torch
 
-# https://stackoverflow.com/questions/56019273/how-can-i-get-more-input-text-in-pyqt5-inputdialog
-# https://stackoverflow.com/questions/41139892/pyqt5-retrieve-folder-directory-and-set-it-in-lineedit
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           dialogs.py
+    Description:    Dialog for split selection, settings selection and a warning dialog
+"""
+
 
 class SplitInputDialog(QDialog):
+    """
+    Dialog allowing user to choose which instruments to separate
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setModal(True)
@@ -39,10 +49,14 @@ class SplitInputDialog(QDialog):
 
 
 class SettingsDialog(QDialog):
+    """
+    Dialog with settings related to separation process
+    """
+
     xps_name_dict = {"195c4583": "Remix + Medley (24/6)", "442d1ed0": "Remix + Medley (28/6)",
-                     "0b6894ef": "Remix (12/3)", "9af80a6a": "Medley (12/3)"}
+                     "0b6894ef": "Remix (12/3)", "9af80a6a": "Medley (12/3)", "af9a0947": "Remix + Medley (12/3)"}
     name_xps_dict = {"Remix + Medley (24/6)": "195c4583", "Remix + Medley (28/6)": "442d1ed0",
-                     "Remix (12/3)": "0b6894ef", "Medley (12/3)": "9af80a6a"}
+                     "Remix (12/3)": "0b6894ef", "Medley (12/3)": "9af80a6a", "Remix + Medley (12/3)": "af9a0947"}
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -52,10 +66,6 @@ class SettingsDialog(QDialog):
     def _open_file_dialog(self, lineEdit):
         directory = str(QFileDialog.getExistingDirectory())
         lineEdit.setText('{}'.format(directory))
-
-    def print_folder(self):
-        # TODO - remove
-        print(self.folderLineEdit.text())
 
     def retranslateUI(self, fileDialog, openButton, dialogue: str, d: str):
         _translate = QCoreApplication.translate
@@ -74,7 +84,6 @@ class SettingsDialog(QDialog):
         self.folderLineEdit = QLineEdit(current_settings["repo"])
         self.folderLineEdit.setEnabled(False)
 
-        self.folderLineEdit.textChanged.connect(self.print_folder)
         self.buttonOpenDialog.clicked.connect(lambda: (self._open_file_dialog(self.folderLineEdit)))
 
         self.retranslateUI(ModelsFolderDialog, self.buttonOpenDialog, "TestQFileDialog", "data")
@@ -92,8 +101,6 @@ class SettingsDialog(QDialog):
                 self.deviceComboBox.setCurrentIndex(1)
 
         # Choosing model signature
-        # TODO - update to newer model
-        #self.modelNameLineEdit = QLineEdit(current_settings["name"])
         self.modelNameComboBox = QComboBox()
         for key, val in self.xps_name_dict.items():
             self.modelNameComboBox.addItem(val)
@@ -124,7 +131,11 @@ class SettingsDialog(QDialog):
         return {"device": self.deviceComboBox.currentText(), "repo": self.folderLineEdit.text(),
                 "name": self.name_xps_dict[self.modelNameComboBox.currentText()], "mp3": True}
 
+
 def showWarningDialog(title, message):
+    """
+    Creates a popup dialog with specified title and message
+    """
     dialog = QMessageBox()
     dialog.setModal(True)
     dialog.setIcon(QMessageBox.Information)

@@ -29,7 +29,7 @@ def get_model(args):
         'sources': list(args.dset.sources),
         'audio_channels': args.dset.channels,
         'samplerate': args.dset.samplerate,
-        'segment': args.model_segment or 5 * args.dset.segment,  # TODO: 5 instead of 4 because of 'guitars' ok?
+        'segment': args.model_segment or 5 * args.dset.segment,
     }
     klass = {'demucs': Demucs}[args.model]
     kw = OmegaConf.to_container(getattr(args, args.model), resolve=True)
@@ -83,7 +83,6 @@ def get_solver(args, model_only=False):
     train_loader = distrib.loader(
         train_set, batch_size=args.batch_size, shuffle=True,
         num_workers=args.misc.num_workers, drop_last=True)
-    # TODO shuffle really False? what is args.dset.full_cv
     valid_loader = distrib.loader(
         valid_set, batch_size=args.batch_size, shuffle=False,
         num_workers=args.misc.num_workers, drop_last=True)

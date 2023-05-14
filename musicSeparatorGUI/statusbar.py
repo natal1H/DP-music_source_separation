@@ -3,6 +3,13 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt
 from utils import changeWidgetColor
 
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           statusbar.py
+    Description:    Status bar with information what is currently happening
+"""
 
 class StatusBar(QWidget):
     def __init__(self):

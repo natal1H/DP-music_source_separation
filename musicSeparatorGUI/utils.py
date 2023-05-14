@@ -1,5 +1,4 @@
 import os.path
-
 from PyQt5.QtGui import QPalette
 import matplotlib.pyplot as plt
 import matplotlib
@@ -8,6 +7,15 @@ import pydub
 import json
 from PIL import Image
 from pydub import AudioSegment
+
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           utils.py
+    Description:    Utility functions
+"""
+
 
 def read_mp3(filepath):
     """MP3 to numpy array"""
@@ -18,6 +26,10 @@ def read_mp3(filepath):
 
 
 def save_waveform_plot(mp3_path, save_location, width_px=1200, height_px=90):
+    """
+    Generates the waveform graph and save the figure to chosen location
+    """
+
     signal_framerate, signal = read_mp3(mp3_path)
 
     time = np.linspace(0, len(signal) / signal_framerate, num=len(signal))
@@ -44,7 +56,10 @@ def changeWidgetColor(widget, color):
     widget.setPalette(palette)
 
 
-def formatTime(ms: int):
+def formatTime(ms):
+    """
+    Formats time in ms to minutes:seconds
+    """
     seconds = ms / 1000
     minutes = str(int(seconds / 60))
     seconds = int(seconds % 60)
@@ -53,6 +68,10 @@ def formatTime(ms: int):
 
 
 def overlay_tracks(tracks_locations, save_location, save_name="mixed.mp3"):
+    """
+    Sums multiple audio files into single audio
+    """
+
     audios = []
     for track_location in tracks_locations:
         audios.append(AudioSegment.from_file(track_location))

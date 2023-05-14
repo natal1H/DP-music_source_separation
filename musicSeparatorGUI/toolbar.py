@@ -5,6 +5,14 @@ from PyQt5.QtMultimedia import QMediaPlayer
 from utils import changeWidgetColor
 from player import Player
 
+""" Application for Guitar Sound Separation from Music Recording
+
+    Author:         Natália Holková
+    Login:          xholko02
+    File:           toolbar.py
+    Description:    Toolbar with options related to audio control
+"""
+
 class Toolbar(QWidget):
 
     def __init__(self, player: Player):
@@ -92,7 +100,6 @@ class Toolbar(QWidget):
                     self.player.setPosition(0)
                 self.player.play()
                 self.playPauseButton.setIcon(QIcon('img/pause_icon.png'))
-
 
     def change_volume(self):
         self.player.setVolume(self.volumeSlider.value())
